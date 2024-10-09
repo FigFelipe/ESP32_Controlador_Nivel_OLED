@@ -70,7 +70,7 @@ Por padrão, o módulo de display OLED utiliza o valor de 0x3C como endereçamen
 |-----------------------|
 | 0x3C                  | 
 
-### 4. Medidor de vazão YF-S201
+### 4. Medidor de Vazão YF-S201
 
-Descrição sobre o dispositivo.
+O medidor é simulado digitalmente, através da variação de geração de pulsos em um GPIO do ESP32.
 
