@@ -33,6 +33,18 @@
 #define potenciometro 34   // Pino do canal ADC que recebe a variação de tensão do potenciometro
 #define builtinLed 2       // Led onboard ESP32 Wroom shield
 
+// LED RGB
+#define ledRed 19
+#define ledGreen 18
+#define ledBlue 5
+
+// Gerador de Onda Quadrada (Oscilador)
+// Observação:
+// * É utilizado o builtin led (GPIO 2) como saída digital para geração de onda quadrada
+// * É utilizado o GPIO 4 para receber os pulsos gerados pelo GPIO 2
+
+#define contadorPulsosInt 4  // Pino de interrupção para contar a quantidade de pulsos recebida do YF-S201
+
 // PCF8574 I2C Addressing Map (8 devices max)
 // https://github.com/xreef/PCF8574_library
 // ------------------------
@@ -46,7 +58,6 @@
 //  0x26   | 1  | 1  | 0  |
 //  0x27   | 1  | 1  | 1  |
 // ------------------------
-
 
 //---------------------------------------//
 // Objetos
@@ -64,6 +75,8 @@ Adafruit_SSD1306 oled(LarguraTela, AlturaTela, &Wire, -1); // Objeto 'oled' do t
 String joystickBotaoPressionado;                // Nome do botão pressionado (Up, Down, Left, Right, Set e Reset)
 volatile bool exibirBotaoPressionado = false;   // Flag de evento, para somente quando algum botao do Joystick for acionado
 
+unsigned volatile long quantidadePulsos = 0;
+
 //variables to keep track of the timing of recent interrupts
 volatile unsigned long buttonTime = 0;  
 volatile unsigned long lastButtonTime = 0;
@@ -76,23 +89,38 @@ unsigned long tempoAgora = 0;
 unsigned long tempoAnterior = 0;  
 
 //---------------------------------------//
-// Métodos
+// Interrupções - ISR
 //---------------------------------------//
 
-// Interrupt Service Routine
-void IRAM_ATTR isr() 
+// Joystick - Interrupt Service Routine
+void IRAM_ATTR IsrJoystick() 
 {
   // Software Debounce
   buttonTime = millis();
   
   if((buttonTime - lastButtonTime) > 900)
   {
-    Serial.println("\nISR");
+    Serial.println("\nISR Joystick");
     exibirBotaoPressionado = true;
     lastButtonTime = buttonTime;
   }
 
 }
+
+// ContadorPulsos YF-S201 - Interrupt Service Routine
+void IRAM_ATTR IsrMedidorVazao()
+{
+  // Realiza a contagem da quantidade de pulsos
+  // [Determinar o polling rate]
+
+  Serial.println("\nISR YF-S201");
+  Serial.println(quantidadePulsos);
+  quantidadePulsos++;
+}
+
+//---------------------------------------//
+// Métodos
+//---------------------------------------//
 
 void LerValorADC()
 {
@@ -278,7 +306,10 @@ void setup() {
   // Entradas
 
   // Saidas
-  pinMode(builtinLed, OUTPUT);
+  pinMode(builtinLed, OUTPUT); // builtin led
+  pinMode(ledRed, OUTPUT);     // led RGB
+  pinMode(ledGreen, OUTPUT);   // led RGB
+  pinMode(ledBlue, OUTPUT);    // led RGB
 
   // PinMode 'PCF8574'
   // Entradas
@@ -311,7 +342,8 @@ void setup() {
   //    3. CHANGE (qdo o nível do pino é alterado)
   //    4. FALLING (qdo o pino vai do estado 1 para o estado 0)
   //    5. RISING (qdo o pino vai do estado 0 para o estado 1)
-  attachInterrupt(digitalPinToInterrupt(pcf8574Int), isr, FALLING);
+  attachInterrupt(digitalPinToInterrupt(pcf8574Int), IsrJoystick, FALLING);     // Joystick - Interrupt Service Routine
+  attachInterrupt(digitalPinToInterrupt(contadorPulsosInt), IsrMedidorVazao, FALLING); // Medidor de Vazao - Interrupt Service Routine
 
   delay(50);
 
