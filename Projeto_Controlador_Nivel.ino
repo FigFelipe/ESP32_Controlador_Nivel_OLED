@@ -111,14 +111,14 @@ void LerValorADC()
   // [x = 225.5Hz (max) @1800L/H ou 30L/min]
 
   // Aproximação - via polinomial
-  // Freq[Hz] = 0.128 * Vazao[L/H] + 1.49
-  // Freq = 0.128 * 1800 + 1.49
-  // [Freq = 231.89 Hz]
+  // Freq[Hz] = 0.1275 * Vazao[L/H] + 2.347
+  // Freq = 0.1275 * 1800 + 2.347
+  // [Freq = 231.85 Hz]
   // [Freq ~= 232 Hz (max)]
 
   // Erro
-  // Erro = 225.5 - 231.89
-  // [Erro = +-6,39Hz ou +-2,75%]
+  // Erro = 225.5 - 231.85
+  // [Erro = +-6,35Hz ou +-2,74%]
 
   // Linearização de valores via map()
   frequencia = map(valorADC, 0, 4095, 0, 232);
