@@ -1,14 +1,12 @@
 // Projeto Controlador de Nível
 // Autor: Felipe Figueiredo Bezerra
-// Versao
-
-//---------------------------------------//
-// Modificações
-//---------------------------------------//
 
 //---------------------------------------//
 // Resumo
 //---------------------------------------//
+
+//       i²C        GPIO
+// ESP32 <-> PCF8547 <-> Joystick
 
 // 1. Através da comunicação I2C do PCF8574, receber os comandos de teclado via Joystick 5 Eixos
 // 2. Através do potenciometro, simular a resposta em frequencia (Hz) do sensor de vazão YF-S201
