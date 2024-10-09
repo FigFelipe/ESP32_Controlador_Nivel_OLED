@@ -36,7 +36,7 @@
 // LED RGB
 #define ledRed 19
 #define ledGreen 18
-#define ledBlue 5
+#define ledBlue 26 // Modificado o GPIO 5 para o GPIO 26, pois ao resetar o ESP32, o GPIO 5 vai para o nível lógico UM
 
 // Gerador de Onda Quadrada (Oscilador)
 // Observação:
