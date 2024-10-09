@@ -30,7 +30,6 @@
 
 // GPIO
 #define pcf8574Int 23      // Pino de interrupção do PCF8574 (ativo em nível ZERO)
-#define potenciometro 34   // Pino do canal ADC que recebe a variação de tensão do potenciometro
 #define builtinLed 2       // Led onboard ESP32 Wroom shield
 
 // LED RGB
@@ -68,6 +67,8 @@ PCF8574::DigitalInput di;     // Objeto 'di' para obter o status de cada GPIO do
 
 Adafruit_SSD1306 oled(LarguraTela, AlturaTela, &Wire, -1); // Objeto 'oled' do tipo 'Adafruit_SSD1306'
 
+hw_timer_t *Tempo = NULL; // Timer
+
 //---------------------------------------//
 // Variáveis
 //---------------------------------------//
@@ -76,6 +77,12 @@ String joystickBotaoPressionado;                // Nome do botão pressionado (U
 volatile bool exibirBotaoPressionado = false;   // Flag de evento, para somente quando algum botao do Joystick for acionado
 
 unsigned volatile long quantidadePulsos = 0;
+volatile bool flagLerFrequenciaPulsos = false;
+
+float vazaoInstLitroHora = 0;      // Vazao instantanea em L/h
+float vazaoInstMlSegundo = 0;      // Vazao instantanea em ml/s
+float vazaoAcumulada = 0;
+int freqInst = 0;
 
 //variables to keep track of the timing of recent interrupts
 volatile unsigned long buttonTime = 0;  
@@ -83,10 +90,6 @@ volatile unsigned long lastButtonTime = 0;
 
 int valorADC = 0;         // Valor do canal ADC (0-4096)
 int frequencia = 0;   // Valor calculado com base na leitura do canal ADC
-
-float periodoParcial = 0.0000;
-unsigned long tempoAgora = 0;
-unsigned long tempoAnterior = 0;  
 
 //---------------------------------------//
 // Interrupções - ISR
@@ -111,108 +114,73 @@ void IRAM_ATTR IsrJoystick()
 void IRAM_ATTR IsrMedidorVazao()
 {
   // Realiza a contagem da quantidade de pulsos
-  // [Determinar o polling rate]
-
-  Serial.println("\nISR YF-S201");
-  Serial.println(quantidadePulsos);
+  //Serial.println("\nISR YF-S201");
+  //Serial.println(quantidadePulsos);
   quantidadePulsos++;
+}
+
+// Timer 1s
+void IRAM_ATTR IsrTempo()
+{
+  // Realiza a leitura, durante 1s, da quantidade de pulsos recebida no GPIO 4
+  // O valor recebido é em Hertz [Hz]
+  // Explicação:
+  // fout = 1 / T
+  // fout = 1 / 1
+  // fout = quantidadePulsos (GPIO 4)
+
+  //Serial.println("\nISR Timer");
+  flagLerFrequenciaPulsos = true;
 }
 
 //---------------------------------------//
 // Métodos
 //---------------------------------------//
 
-void LerValorADC()
+void FrequenciaMedidorVazao()
 {
-  // Realiza a leitura do ADC para o GPIO potenciometro
-  valorADC = analogRead(potenciometro);
+  // Se o flag acionado pelo ISR MedidorVazao
+  if(flagLerFrequenciaPulsos)
+  {
+    // Realiza o cálculo da vazao instantanea em Litros/Hora
+    VazaoInstantanea();
 
-  // Mapping
-  // ADC Bits: 0-4095
-  // Frequencia YF-S201: 232Hz (consulte o calculo abaixo)
-  
-  // Aproximação - via regra de três
-  // 720L/H --> 90.2 Hz
-  // 1800 L/H --> x? Hz
+    Serial.printf("\n[P]%u [V L/H]%.2f", quantidadePulsos, vazaoInst);
 
-  // x = (90.2 * 1800) / 720
-  // [x = 225.5Hz (max) @1800L/H ou 30L/min]
-
-  // Aproximação - via polinomial
-  // Freq[Hz] = 0.1275 * Vazao[L/H] + 2.347
-  // Freq = 0.1275 * 1800 + 2.347
-  // [Freq = 231.85 Hz]
-  // [Freq ~= 232 Hz (max)]
-
-  // Erro
-  // Erro = 225.5 - 231.85
-  // [Erro = +-6,35Hz ou +-2,74%]
-
-  // Linearização de valores via map()
-  frequencia = map(valorADC, 0, 4095, 0, 232);
-
-  // De acordo com a frequencia obtida, entao gerar a onda quadrada
-  GerarOndaQuadrada(frequencia); 
-
-  //Serial.printf("\n[ADC]%i [Hz]%i", valorADC, frequencia);
-
+    quantidadePulsos = 0;
+    flagLerFrequenciaPulsos = false;
+  }
 }
 
-void GerarOndaQuadrada(float valorFrequencia)
-{ 
-  //     _____       _____
-  //    |     |     |     |
-  //    |     |_____|     |_____
-  //    
-  //    |---T(ms)---|
-  //    |-----|-----|
-  //      50%   50%
-  
-  // Freq[Hz] = 1 / T[s]
-  // Logo:  
-  // --> [T = 1 / Freq]
-
-  // [YF-S201]
-  // Hz  | T       | T/2           |
-  // 231 | 4.329ms | 2.164ms [max] |
-  // 1   | 1000ms  | 500ms   [min] |
-
-  // Evitar a divisão por ZERO (INF)
-  if(valorFrequencia > 0)
-  {
-    //Calcular o periodo considerando o duty cycle de 50%
-    periodoParcial = ((1 / valorFrequencia) / 2) * 1000; // Resposta em Milisegundos (ms)
-
-    // Obtem o tempo atual
-    tempoAgora = millis();
-    
-    // Se o tempo decorrido for maior igual ao 'periodoParcial'
-    if(tempoAgora - tempoAnterior >= periodoParcial)
-    {
-      digitalWrite(builtinLed, !digitalRead(builtinLed));
-      tempoAnterior = tempoAgora;
-    }
-  }
-  else
-  {
-    periodoParcial = 0;
-    digitalWrite(builtinLed, LOW);
-  }
-
-  //Serial.printf("\n[ADC]%i [Hz]%i [T/2]%.2f ms", valorADC, frequencia, periodoParcial);
-
-}
-
-void ObterVazao()
+void VazaoInstantanea()
 {
-  // y = 0.1275x + 2.347
-  // Freq[Hz] = 0.1275 * Vazao[L/H] + 2.347
+  // Datasheet
+ 
+  // Vazao [L/H] | Freq [Hz] |
+  //    120      |    16     |
+  //    240      |    32.5   |
+  //    360      |    49.3   |
+  //    480      |    65.5   |
+  //    600      |    82     |
+  //    720      |    90.2   |
+
+  // Aplicando a regressão linear (Calculadora Gráfica)
+  // https://www.desmos.com/calculator?lang=pt-BR
+  
+  // Resposta: --> [y = 0.1275x + 2.347]
+
+  // Substituindo os valores de x e y...
+  // --> Freq[Hz] = 0.1275 * Vazao[L/H] + 2.347
+  
   // Logo:
-  // Vazao[L/H] = (Freq[Hz] - 1.49) / 0.128
-
+  // --> Vazao[L/H] = (Freq[Hz] - 1.49) / 0.128
+  
+  vazaoInstLitroHora = (quantidadePulsos - 1.49) / 0.128; // Unidade: L/h
+  vazaoInstMlSegundo = (vazaoInstLitroHora / 3600) * 1000;
+ 
 }
 
-void ObterFrequencia()
+void FrequenciaInstantanea()
 {
   // y = 0.1275x + 2.347
   // Freq[Hz] = 0.1275 * Vazao[L/H] + 2.347
@@ -301,6 +269,7 @@ void TestarLedRgb()
 }
 
 
+
 void ReadPcf8574Inputs()
 {
   di = ioExpander_1.digitalReadAll();
@@ -334,16 +303,19 @@ void ReadPcf8574Inputs()
     joystickBotaoPressionado = "Reset";
   }
 
+  // Quando a interrupção ocorre, então exibir qual o botão foi pressionado
+  if(exibirBotaoPressionado)
+  {
+    Serial.printf("Joystick: %s", joystickBotaoPressionado);
+    exibirBotaoPressionado = false;
+  }
+
 }
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   Serial.println("Hello, ESP32!");
-
-  // ADC
-  // (0-4095 bits) --> (0V - 3.3V)
-  analogReadResolution(12);
 
   // PinMode 'ESP32'
   // Entradas
@@ -407,6 +379,13 @@ void setup() {
   // Testar o led RGB
   TestarLedRgb();
 
+  // Inicializar o Timer
+  Tempo = timerBegin(1000000);             // Inicializa o timer com o parametro de 1000000
+  timerAttachInterrupt(Tempo, &IsrTempo);  // Anexa o timer 'Tempo' ao serviço de interrupção ISR
+  timerAlarm(Tempo, 1000000 * 1, true, 0);   // Determina quando haverá a interrupção (no caso, á cada 1s)
+
+  //timerWrite(Tempo, 0); // Reseta o timer
+  
 }
 
 void loop() {
@@ -415,16 +394,11 @@ void loop() {
 
   // Realiza a leitura das entradas do PCF8574
   ReadPcf8574Inputs();
-  
-  // Quando a interrupção ocorre, então exibir qual o botão foi pressionado
-  if(exibirBotaoPressionado)
-  {
-    Serial.printf("Joystick: %s", joystickBotaoPressionado);
-    exibirBotaoPressionado = false;
-  }
 
-  // Realiza a leitura do canal ADC ESP32
-  LerValorADC();
+  // Realiza a leitura da frequencia de pulsos recebida do Medido de Vazao durante o intervalo de 1s
+  FrequenciaMedidorVazao();
+
+  
 
   MenuPrincipal();
 
