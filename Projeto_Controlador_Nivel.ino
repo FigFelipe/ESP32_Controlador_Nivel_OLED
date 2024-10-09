@@ -257,6 +257,49 @@ void MenuPrincipal()
   //delay(5);
 }
 
+void TestarLedRgb()
+{
+  // Escrever com o valor ZERO
+  digitalWrite(ledRed, LOW);
+  digitalWrite(ledGreen, LOW);
+  digitalWrite(ledBlue, LOW);
+  delay(100);
+
+  // Testar cada led
+  // Testando o led Vermelho
+  digitalWrite(ledRed, HIGH);
+  delay(500);
+  digitalWrite(ledRed, LOW);
+  delay(500);
+
+  // Testando o led Verde
+  digitalWrite(ledGreen, HIGH);
+  delay(500);
+  digitalWrite(ledGreen, LOW);
+  delay(500);
+
+  // Testando o led Azul
+  digitalWrite(ledBlue, HIGH);
+  delay(500);
+  digitalWrite(ledBlue, LOW);
+  delay(500);
+
+  // Testar todos os Leds
+  digitalWrite(ledRed, HIGH);
+  delay(500);
+  digitalWrite(ledGreen, HIGH);
+  delay(500);
+  digitalWrite(ledBlue, HIGH);
+  delay(500);
+
+  // Escrever com o valor ZERO
+  digitalWrite(ledRed, LOW);
+  digitalWrite(ledGreen, LOW);
+  digitalWrite(ledBlue, LOW);
+  delay(100);
+
+}
+
 
 void ReadPcf8574Inputs()
 {
@@ -360,6 +403,9 @@ void setup() {
   // Limpar o display
   oled.clearDisplay();
   delay(1000);
+
+  // Testar o led RGB
+  TestarLedRgb();
 
 }
 
