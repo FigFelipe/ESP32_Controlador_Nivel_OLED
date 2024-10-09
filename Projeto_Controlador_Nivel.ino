@@ -5,8 +5,8 @@
 // Resumo
 //---------------------------------------//
 
-//       i²C        GPIO
-// ESP32 <-> PCF8547 <-> Joystick
+//       i²C      i²C        GPIO
+// ESP32 <-> OLED <-> PCF8547 <-> Joystick
 
 // 1. Através da comunicação I2C do PCF8574, receber os comandos de teclado via Joystick 5 Eixos
 // 2. Através do potenciometro, simular a resposta em frequencia (Hz) do sensor de vazão YF-S201
@@ -172,6 +172,22 @@ void GerarOndaQuadrada(float valorFrequencia)
   }
 
   //Serial.printf("\n[ADC]%i [Hz]%i [T/2]%.2f ms", valorADC, frequencia, periodoParcial);
+
+}
+
+void ObterVazao()
+{
+  // y = 0.1275x + 2.347
+  // Freq[Hz] = 0.1275 * Vazao[L/H] + 2.347
+  // Logo:
+  // Vazao[L/H] = (Freq[Hz] - 1.49) / 0.128
+
+}
+
+void ObterFrequencia()
+{
+  // y = 0.1275x + 2.347
+  // Freq[Hz] = 0.1275 * Vazao[L/H] + 2.347
 
 }
 
