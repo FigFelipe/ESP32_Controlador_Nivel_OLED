@@ -75,6 +75,7 @@ hw_timer_t *Tempo = NULL; // Timer
 
 String joystickBotaoPressionado;                // Nome do botão pressionado (Up, Down, Left, Right, Set e Reset)
 volatile bool exibirBotaoPressionado = false;   // Flag de evento, para somente quando algum botao do Joystick for acionado
+volatile int eventosInterrupcao = 0;
 
 unsigned volatile long quantidadePulsos = 0;
 volatile bool flagLerFrequenciaPulsos = false;
@@ -110,9 +111,10 @@ void IRAM_ATTR IsrJoystick()
   // Software Debounce
   buttonTime = millis();
   
-  if((buttonTime - lastButtonTime) > 150)
+  if((buttonTime - lastButtonTime) > 50)
   {
-    Serial.println("\nISR Joystick");
+    //Serial.println("\nISR Joystick");
+    eventosInterrupcao++;
     exibirBotaoPressionado = true;
     lastButtonTime = buttonTime;
   }
@@ -399,7 +401,7 @@ void TestarLedRgb()
 void ReadPcf8574Inputs()
 {
   di = ioExpander_1.digitalReadAll();
-  delay(100);
+  delay(20);
   
   if(di.p1 == LOW)
   {
@@ -429,13 +431,30 @@ void ReadPcf8574Inputs()
   {
     joystickBotaoPressionado = "Reset";
   }
+  else
+  {
+    joystickBotaoPressionado = "None";
+  }
+
+  // O PCF8574 registra dois eventos de INT á cada acionamento individual do joystick
+  // Exemplo:
+  // ISR Mid (INT-1) Botao pressionado <-- Realizar a leitura nesse evento
+  // ISR Mid (INT-2) Botao solto
 
   // Quando a interrupção ocorre, então exibir qual o botão foi pressionado
-  if(exibirBotaoPressionado)
+  if(exibirBotaoPressionado && eventosInterrupcao == 1)
   {
-    Serial.printf("\nJoystick: %s", joystickBotaoPressionado);
-    Serial.printf("\n[Pag]%i  [Linha]%i", menuPagina, menuLinha);
-    exibirBotaoPressionado = false;
+    // Obter a leitura do botao do joystick somente no evento de RISING (retorno - solto)
+    // O termo 'None' é quando o botão físico do joystick está no evento de FALLING (pressionado)
+    if(joystickBotaoPressionado != "None") 
+    {
+      Serial.printf("\nJoystick: %s", joystickBotaoPressionado);
+    }
+
+   //Serial.printf("\n[Pag]%i  [Linha]%i", menuPagina, menuLinha);
+   eventosInterrupcao = 0; 
+   exibirBotaoPressionado = false;
+    
   }
   
 }
@@ -516,6 +535,9 @@ void setup() {
 
   // Exibir o Menu Principal (estático) no display
   MenuPrincipal();
+
+  // Reset do contador de eventos de interrupcao (Bugfix)
+  eventosInterrupcao = 0;
   
 }
 
