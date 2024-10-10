@@ -39,7 +39,7 @@
 
 // Gerador de Onda Quadrada (Oscilador)
 // Observação:
-// * É utilizado o builtin led (GPIO 2) como saída digital para geração de onda quadrada
+// * É utilizado, de um outro ESP32, o builtin led (GPIO 2) como saída digital para geração de onda quadrada
 // * É utilizado o GPIO 4 para receber os pulsos gerados pelo GPIO 2
 
 #define contadorPulsosInt 4  // Pino de interrupção para contar a quantidade de pulsos recebida do YF-S201
@@ -110,7 +110,7 @@ void IRAM_ATTR IsrJoystick()
   // Software Debounce
   buttonTime = millis();
   
-  if((buttonTime - lastButtonTime) > 900)
+  if((buttonTime - lastButtonTime) > 150)
   {
     Serial.println("\nISR Joystick");
     exibirBotaoPressionado = true;
@@ -157,12 +157,12 @@ void FrequenciaMedidorVazao()
     VazaoInstantanea();   // Realiza o cálculo da vazao instantanea em Litros/Hora
     VazaoAcumulada();     // Realiza a soma acumulativa da vazao instantanea em Litros/Segundo (pois o polling rate é 1 segundo)
 
-    Serial.printf("\n[P]%u  [Vinst]%.2f L/h  [Vinst]%.4f L/s  [Vinst]%.2f mL/s  [Vacc]%.2f L", 
-                    quantidadePulsos,
-                    vazaoInstLitroHora,
-                    vazaoInstLitroSegundo,
-                    vazaoInstMililitroSegundo,
-                    vazaoAcumuladaLitro);
+    // Serial.printf("\n[P]%u  [Vinst]%.2f L/h  [Vinst]%.4f L/s  [Vinst]%.2f mL/s  [Vacc]%.2f L", 
+    //                 quantidadePulsos,
+    //                 vazaoInstLitroHora,
+    //                 vazaoInstLitroSegundo,
+    //                 vazaoInstMililitroSegundo,
+    //                 vazaoAcumuladaLitro);
 
     quantidadePulsos = 0;
     flagLerFrequenciaPulsos = false;
@@ -223,36 +223,72 @@ void FrequenciaInstantanea()
 
 }
 
-void MenuVazaoInstantanea()
+void ControleAutomacao()
 {
-  oled.clearDisplay();
+
+}
+
+void ExibirTempoDecorrido()
+{
+  // Como apagar somente uma determinada regiao
+  // desenhar um fillRectangle invertido
+  oled.fillRect(0, 0, 80, 12, SSD1306_BLACK);   // Apaga somente a linha superior
+  oled.fillRect(4, 39, 120, 24, SSD1306_BLACK); // Apaga o conteudo do tempo decorrido
+
+  // Nível Acumulado
+  oled.setCursor(40, 45);
+  oled.setTextSize(2);             
+  oled.setTextColor(SSD1306_WHITE);
+  oled.print("00:00:00");
+  oled.print("s");
+
+  // Exibe informações no OLED
+  oled.display();
+
+}
+
+void ExibirVazaoInstantanea()
+{
+  // Como apagar somente uma determinada regiao
+  // desenhar um fillRectangle invertido
+  oled.fillRect(0, 0, 80, 12, SSD1306_BLACK);   // Apaga somente a linha superior
+  oled.fillRect(4, 39, 120, 24, SSD1306_BLACK); // Apaga o conteudo da vazao instantanea
 
   // Linha superior
   oled.setCursor(0,0);             // Start at top-left corner
   oled.setTextSize(1);             // Normal 1:1 pixel scale
   oled.setTextColor(SSD1306_WHITE);        // Draw white text
-  oled.println(F("Vazao inst. (L/H)"));
+  oled.println(F("Vazao Inst:"));
 
-  // OBS: A divisão entre as cores Amarelo e Azul é equivalente á y0 = 17
-  // Retangulo
-  oled.drawRect(2, 17, 124, 19, SSD1306_WHITE);
+  // Nível Acumulado
+  oled.setCursor(40, 45);
+  oled.setTextSize(2);             
+  oled.setTextColor(SSD1306_WHITE);
+  oled.print("0");
+  oled.print("L/h");
 
   // Exibe informações no OLED
-  oled.display();
-  //delay(5);
+  oled.display();;
 }
 
-void InformacaoMenu()
+void ExibirNivelAcumulado()
 {
   // Como apagar somente uma determinada regiao
   // desenhar um fillRectangle invertido
-  oled.fillRect(4, 39, 120, 24, SSD1306_BLACK);
+  oled.fillRect(0, 0, 80, 12, SSD1306_BLACK);   // Apaga somente a linha superior
+  oled.fillRect(4, 39, 120, 24, SSD1306_BLACK); // Apaga o conteúdo da informação sobre o nível acumulado 
 
-  // Temperatura (valor numerico)
-  oled.setCursor(25,40);
+  // Linha superior
+  oled.setCursor(0,0);             // Start at top-left corner
+  oled.setTextSize(1);             // Normal 1:1 pixel scale
+  oled.setTextColor(SSD1306_WHITE);        // Draw white text
+  oled.println(F("Nivel Total:"));
+
+  // Nível Acumulado
+  oled.setCursor(40, 45);
   oled.setTextSize(2);             
   oled.setTextColor(SSD1306_WHITE);
-  oled.print("1000");
+  oled.print("0");
   oled.print("L");
 
   // Exibe informações no OLED
@@ -283,19 +319,37 @@ void MenuPrincipal()
   //delay(5);
 }
 
-void ControleNavegacaoMenu()
+void MenuNavegacao()
 {
-  // Pagina Inicial (SP, progressBar, PV, Motor)
-  // Ao pressionar 'MID'
-  //        --> Setpoint
-  //        --> Zerar PV
-  //        --> Setpoint
-  switch(menuPagina)
+  if(flagAtualizaOled) // Atualiza o conteúdo do OLED a cada 1s
   {
-    case 0:
-      MenuPrincipal();
-      break;
+    if(menuPagina < 0)
+    {
+      menuPagina = 0;
+    }
+    else if(menuPagina > 2)
+    {
+      menuPagina = 2;
+    }
+
+    switch(menuPagina)
+    {
+      case 0:
+        ExibirNivelAcumulado();
+        break;
+
+      case 1:
+        ExibirVazaoInstantanea();
+        break;
+
+      case 2:
+        ExibirTempoDecorrido();
+        break;
+    }
+
+    flagAtualizaOled = false; // Reset do flag
   }
+  
 
 }
 
@@ -345,7 +399,8 @@ void TestarLedRgb()
 void ReadPcf8574Inputs()
 {
   di = ioExpander_1.digitalReadAll();
-
+  delay(100);
+  
   if(di.p1 == LOW)
   {
     joystickBotaoPressionado = "Up";
@@ -358,7 +413,7 @@ void ReadPcf8574Inputs()
   {
     joystickBotaoPressionado = "Left";
   }
-  else if(di.p4 == LOW)
+    else if(di.p4 == LOW)
   {
     joystickBotaoPressionado = "Right";
   }
@@ -378,10 +433,11 @@ void ReadPcf8574Inputs()
   // Quando a interrupção ocorre, então exibir qual o botão foi pressionado
   if(exibirBotaoPressionado)
   {
-    Serial.printf("Joystick: %s", joystickBotaoPressionado);
+    Serial.printf("\nJoystick: %s", joystickBotaoPressionado);
+    Serial.printf("\n[Pag]%i  [Linha]%i", menuPagina, menuLinha);
     exibirBotaoPressionado = false;
   }
-
+  
 }
 
 void setup() {
@@ -457,6 +513,9 @@ void setup() {
   timerAlarm(Tempo, 1000000 * 1, true, 0);   // Determina quando haverá a interrupção (no caso, á cada 1s)
 
   //timerWrite(Tempo, 0); // Reseta o timer
+
+  // Exibir o Menu Principal (estático) no display
+  MenuPrincipal();
   
 }
 
@@ -471,8 +530,9 @@ void loop() {
   FrequenciaMedidorVazao();
 
   // Controle de navegação e exibição de Menus
-  ControleNavegacaoMenu();
+  //MenuNavegacao();
 
-  InformacaoMenu();
+  // Controle de automação
+  ControleAutomacao();
 
 }
