@@ -80,8 +80,11 @@ unsigned volatile long quantidadePulsos = 0;
 volatile bool flagLerFrequenciaPulsos = false;
 
 float vazaoInstLitroHora = 0;      // Vazao instantanea em L/h
-float vazaoInstMlSegundo = 0;      // Vazao instantanea em ml/s
-float vazaoAcumulada = 0;
+float vazaoInstLitroSegundo = 0;   // Vazao instantanea em L/s
+
+float vazaoAcumuladaLitro = 0;    // Vazao acumulada em L
+float vazaoAcumuladaMililitro = 0; // Vazao acumulada em mL
+
 int freqInst = 0;
 
 //variables to keep track of the timing of recent interrupts
@@ -144,8 +147,9 @@ void FrequenciaMedidorVazao()
   {
     // Realiza o cálculo da vazao instantanea em Litros/Hora
     VazaoInstantanea();
+    VazaoAcumulada();
 
-    Serial.printf("\n[P]%u [V L/H]%.2f", quantidadePulsos, vazaoInst);
+    Serial.printf("\n[P]%u  [Vinst]%.2f L/h  [Vinst]%.4f L/s  [Vacc]%.2f L", quantidadePulsos, vazaoInstLitroHora, vazaoInstLitroSegundo, vazaoAcumuladaLitro);
 
     quantidadePulsos = 0;
     flagLerFrequenciaPulsos = false;
@@ -174,10 +178,25 @@ void VazaoInstantanea()
   
   // Logo:
   // --> Vazao[L/H] = (Freq[Hz] - 1.49) / 0.128
-  
+
   vazaoInstLitroHora = (quantidadePulsos - 1.49) / 0.128; // Unidade: L/h
-  vazaoInstMlSegundo = (vazaoInstLitroHora / 3600) * 1000;
  
+  // Evitar divisao por ZERO
+  if(vazaoInstLitroHora > 0)
+  {
+    vazaoInstLitroSegundo = (vazaoInstLitroHora / 3600);       // Unidade: L/s
+  }
+  else
+  {
+    vazaoInstLitroHora = 0;
+    vazaoInstLitroSegundo = 0;
+  }
+
+}
+
+void VazaoAcumulada()
+{
+   vazaoAcumuladaLitro += vazaoInstLitroSegundo;
 }
 
 void FrequenciaInstantanea()
