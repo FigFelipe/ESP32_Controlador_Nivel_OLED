@@ -78,12 +78,14 @@ volatile bool exibirBotaoPressionado = false;   // Flag de evento, para somente 
 
 unsigned volatile long quantidadePulsos = 0;
 volatile bool flagLerFrequenciaPulsos = false;
+volatile bool flagIgnorarPulsos = false;
 
-float vazaoInstLitroHora = 0;      // Vazao instantanea em L/h
-float vazaoInstLitroSegundo = 0;   // Vazao instantanea em L/s
+float vazaoInstLitroHora = 0;         // Vazao instantanea em L/h
+float vazaoInstLitroSegundo = 0;      // Vazao instantanea em L/s
+float vazaoInstMililitroSegundo = 0;  // Vazao instantanea em mL/s
 
-float vazaoAcumuladaLitro = 0;    // Vazao acumulada em L
-float vazaoAcumuladaMililitro = 0; // Vazao acumulada em mL
+float vazaoAcumuladaLitro = 0;      // Vazao acumulada em L
+float vazaoAcumuladaMililitro = 0;  // Vazao acumulada em mL
 
 int freqInst = 0;
 
@@ -92,7 +94,11 @@ volatile unsigned long buttonTime = 0;
 volatile unsigned long lastButtonTime = 0;
 
 int valorADC = 0;         // Valor do canal ADC (0-4096)
-int frequencia = 0;   // Valor calculado com base na leitura do canal ADC
+int frequencia = 0;       // Valor calculado com base na leitura do canal ADC
+
+volatile bool flagAtualizaOled = false;
+int menuPagina = 0;
+int menuLinha = 0;
 
 //---------------------------------------//
 // Interrupções - ISR
@@ -134,6 +140,8 @@ void IRAM_ATTR IsrTempo()
 
   //Serial.println("\nISR Timer");
   flagLerFrequenciaPulsos = true;
+
+  flagAtualizaOled = true;
 }
 
 //---------------------------------------//
@@ -143,17 +151,23 @@ void IRAM_ATTR IsrTempo()
 void FrequenciaMedidorVazao()
 {
   // Se o flag acionado pelo ISR MedidorVazao
-  if(flagLerFrequenciaPulsos)
+  if(flagLerFrequenciaPulsos && !flagIgnorarPulsos)
   {
-    // Realiza o cálculo da vazao instantanea em Litros/Hora
-    VazaoInstantanea();
-    VazaoAcumulada();
+    
+    VazaoInstantanea();   // Realiza o cálculo da vazao instantanea em Litros/Hora
+    VazaoAcumulada();     // Realiza a soma acumulativa da vazao instantanea em Litros/Segundo (pois o polling rate é 1 segundo)
 
-    Serial.printf("\n[P]%u  [Vinst]%.2f L/h  [Vinst]%.4f L/s  [Vacc]%.2f L", quantidadePulsos, vazaoInstLitroHora, vazaoInstLitroSegundo, vazaoAcumuladaLitro);
+    Serial.printf("\n[P]%u  [Vinst]%.2f L/h  [Vinst]%.4f L/s  [Vinst]%.2f mL/s  [Vacc]%.2f L", 
+                    quantidadePulsos,
+                    vazaoInstLitroHora,
+                    vazaoInstLitroSegundo,
+                    vazaoInstMililitroSegundo,
+                    vazaoAcumuladaLitro);
 
     quantidadePulsos = 0;
     flagLerFrequenciaPulsos = false;
   }
+
 }
 
 void VazaoInstantanea()
@@ -185,18 +199,21 @@ void VazaoInstantanea()
   if(vazaoInstLitroHora > 0)
   {
     vazaoInstLitroSegundo = (vazaoInstLitroHora / 3600);       // Unidade: L/s
+    vazaoInstMililitroSegundo = vazaoInstLitroSegundo * 1000;  // Unidade: mL/s
   }
   else
   {
     vazaoInstLitroHora = 0;
     vazaoInstLitroSegundo = 0;
+    vazaoInstMililitroSegundo = 0;
   }
 
 }
 
 void VazaoAcumulada()
 {
-   vazaoAcumuladaLitro += vazaoInstLitroSegundo;
+  // Realiza a soma acumulativa da vazão em Litro/Segundo
+  vazaoAcumuladaLitro += vazaoInstLitroSegundo;
 }
 
 void FrequenciaInstantanea()
@@ -225,23 +242,61 @@ void MenuVazaoInstantanea()
   //delay(5);
 }
 
+void InformacaoMenu()
+{
+  // Como apagar somente uma determinada regiao
+  // desenhar um fillRectangle invertido
+  oled.fillRect(4, 39, 120, 24, SSD1306_BLACK);
+
+  // Temperatura (valor numerico)
+  oled.setCursor(25,40);
+  oled.setTextSize(2);             
+  oled.setTextColor(SSD1306_WHITE);
+  oled.print("1000");
+  oled.print("L");
+
+  // Exibe informações no OLED
+  oled.display();
+}
+
 void MenuPrincipal()
 {
   oled.clearDisplay();
+
+   // Texto 'Run/Stop'
+  oled.setCursor(90, 0);             // Start at top-left corner
+  oled.setTextSize(1);             // Normal 1:1 pixel scale
+  oled.setTextColor(SSD1306_BLACK, SSD1306_WHITE);        // Draw white text
+  oled.println(F("[STOP]"));
 
   // Linha superior
   oled.setCursor(0,0);             // Start at top-left corner
   oled.setTextSize(1);             // Normal 1:1 pixel scale
   oled.setTextColor(SSD1306_WHITE);        // Draw white text
-  oled.println(F("Vazao inst. (L/H)"));
+  oled.println(F("Nivel Total:"));
 
-  // OBS: A divisão entre as cores Amarelo e Azul é equivalente á y0 = 17
   // Retangulo
-  oled.drawRect(2, 17, 124, 19, SSD1306_WHITE);
+  oled.drawRect(2, 16, 124, 18, SSD1306_WHITE);
 
   // Exibe informações no OLED
   oled.display();
   //delay(5);
+}
+
+void ControleNavegacaoMenu()
+{
+  // Pagina Inicial (SP, progressBar, PV, Motor)
+  // Ao pressionar 'MID'
+  //        --> Setpoint
+  //        --> Zerar PV
+  //        --> Setpoint
+  switch(menuPagina)
+  {
+    case 0:
+      MenuPrincipal();
+      break;
+  }
+
 }
 
 void TestarLedRgb()
@@ -286,8 +341,6 @@ void TestarLedRgb()
   delay(100);
 
 }
-
-
 
 void ReadPcf8574Inputs()
 {
@@ -417,8 +470,9 @@ void loop() {
   // Realiza a leitura da frequencia de pulsos recebida do Medido de Vazao durante o intervalo de 1s
   FrequenciaMedidorVazao();
 
-  
+  // Controle de navegação e exibição de Menus
+  ControleNavegacaoMenu();
 
-  MenuPrincipal();
+  InformacaoMenu();
 
 }
