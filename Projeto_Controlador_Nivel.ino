@@ -116,9 +116,9 @@ bool statusProcesso = false;  // Indicador do processo (RUN, STOP)
 int valorBarraProgresso = 0;
 volatile bool alreadyDraw = false;
 
-int hora = 0;
-int minuto = 0;
-int segundo = 0;
+int horas = 0;
+int minutos = 0;
+int segundos = 0;
 
 //---------------------------------------//
 // Interrupções - ISR
@@ -186,8 +186,13 @@ void FrequenciaMedidorVazao()
     //                 vazaoInstLitroSegundo,
     //                 vazaoInstMililitroSegundo,
     //                 vazaoAcumuladaLitro);
-
     quantidadePulsos = 0;
+
+    if(statusProcesso)
+    {
+      segundos++;
+    }
+
     flagLerFrequenciaPulsos = false;
   }
 
@@ -285,8 +290,36 @@ void ControleAutomacao()
   
 }
 
+// Controla a informação do tempo enquanto o processo está no modo RUN
+void TempoStatusRun()
+{
+  if(segundos > 59)
+  {
+    segundos = 0;
+    minutos++;
+
+    if(minutos > 59)
+    {
+      minutos = 0;
+      horas++;
+
+      if(horas > 23)
+      {
+        segundos = 0;
+        minutos = 0;
+        horas = 0;
+      }
+    }
+  }
+  
+}
+
 void ExibirTempoDecorrido()
 {
+
+  // Controla a formatação do texto de 'relogio' no modo RUN
+  TempoStatusRun();
+
   // Como apagar somente uma determinada regiao
   // desenhar um fillRectangle invertido
   oled.fillRect(0, 0, 80, 12, SSD1306_BLACK);   // Apaga somente a linha superior
@@ -302,7 +335,11 @@ void ExibirTempoDecorrido()
   oled.setCursor(10, 45);
   oled.setTextSize(2);             
   oled.setTextColor(SSD1306_WHITE);
-  oled.print("00:00:00");
+  oled.print(horas);
+  oled.print(":");
+  oled.print(minutos);
+  oled.print(":");
+  oled.print(segundos);
   oled.print("s");
 
   // Exibe informações no OLED
@@ -735,7 +772,7 @@ void ReadPcf8574Inputs()
         }
         else
         {
-          Serial.println("\n[INFO] Não foi possível iniciar o processo pois o SP é igual á ZERO.");
+          Serial.println("\n[INFO] Não foi possível iniciar o processo pois PV = SP.");
         }
         
       }
