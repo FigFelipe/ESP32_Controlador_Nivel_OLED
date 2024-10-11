@@ -114,8 +114,11 @@ bool flagNivelSP = false;     // Indica que o valor do Setpoint foi alcancado
 bool statusProcesso = false;  // Indicador do processo (RUN, STOP)
 
 int valorBarraProgresso = 0;
-
 volatile bool alreadyDraw = false;
+
+int hora = 0;
+int minuto = 0;
+int segundo = 0;
 
 //---------------------------------------//
 // Interrupções - ISR
@@ -173,8 +176,9 @@ void FrequenciaMedidorVazao()
   if(flagLerFrequenciaPulsos && !flagIgnorarPulsos)
   {
     
-    VazaoInstantanea();   // Realiza o cálculo da vazao instantanea em Litros/Hora
-    VazaoAcumulada();     // Realiza a soma acumulativa da vazao instantanea em Litros/Segundo (pois o polling rate é 1 segundo)
+    VazaoInstantanea();       // Realiza o cálculo da vazao instantanea em Litros/Hora
+    VazaoAcumulada();         // Realiza a soma acumulativa da vazao instantanea em Litros/Segundo (pois o polling rate é 1 segundo)
+    FrequenciaInstantanea();  // Realiza o calculo da frequencia instantanea do YF-S201
 
     // Serial.printf("\n[P]%u  [Vinst]%.2f L/h  [Vinst]%.4f L/s  [Vinst]%.2f mL/s  [Vacc]%.2f L", 
     //                 quantidadePulsos,
@@ -239,6 +243,13 @@ void FrequenciaInstantanea()
 {
   // y = 0.1275x + 2.347
   // Freq[Hz] = 0.1275 * Vazao[L/H] + 2.347
+  freqInst = 0.1275 * vazaoInstLitroHora + 2.437;
+
+  // Devido ao ruído no GPIO 4, considerar o erro de 1% (2Hz)
+  if(freqInst <= 2)
+  {
+    freqInst = 0;
+  }
 
 }
 
@@ -279,7 +290,7 @@ void ExibirTempoDecorrido()
   // Como apagar somente uma determinada regiao
   // desenhar um fillRectangle invertido
   oled.fillRect(0, 0, 80, 12, SSD1306_BLACK);   // Apaga somente a linha superior
-  oled.fillRect(0, 39, 128, 24, SSD1306_BLACK); // Apaga o conteudo do tempo decorrido
+  oled.fillRect(0, 36, 128, 24, SSD1306_BLACK); // Apaga o conteudo do tempo decorrido
 
   // Linha superior
   oled.setCursor(0,0);             // Start at top-left corner
@@ -312,12 +323,66 @@ void ExibirVazaoInstantanea()
   oled.setTextColor(SSD1306_WHITE);        // Draw white text
   oled.println(F("Vazao Inst:"));
 
-  // Nível Acumulado
-  oled.setCursor(2, 45);
-  oled.setTextSize(2);             
+  // Nível Setpoint
+  oled.setCursor(90, 37);
+  oled.setTextSize(1);             
   oled.setTextColor(SSD1306_WHITE);
-  oled.print(vazaoInstMililitroSegundo);
-  oled.print("mL/s");
+  oled.print(nivelSP);
+  oled.print("L");
+
+  // Alternar exibições entre as unidades:
+  // 1. vazao instantanea (ml/s)
+  // 2. vazao instantanea (L/s)
+  // 3. vazao instantanea (L/h)
+  // 4. frequencia do medidor de vazao YF-S201
+
+  if(menuPagina == 1)
+  {
+    // Definir os limites de navegacao
+    if(menuLinha < 0)
+    {
+      menuLinha = 0;
+    }
+    else if(menuLinha > 3)
+    {
+      menuLinha = 3;
+    }
+
+    switch(menuLinha)
+    {
+      case 0:
+        oled.setCursor(2, 45);
+        oled.setTextSize(2);             
+        oled.setTextColor(SSD1306_WHITE);
+        oled.print(vazaoInstMililitroSegundo);
+        oled.print("ml/s");
+        break;
+
+      case 1:
+        oled.setCursor(2, 45);
+        oled.setTextSize(2);             
+        oled.setTextColor(SSD1306_WHITE);
+        oled.print(vazaoInstLitroSegundo);
+        oled.print("L/s");
+        break;
+
+      case 2:
+        oled.setCursor(2, 45);
+        oled.setTextSize(2);             
+        oled.setTextColor(SSD1306_WHITE);
+        oled.print(vazaoInstLitroHora);
+        oled.print("L/h");
+        break;
+
+      case 3:
+        oled.setCursor(2, 45);
+        oled.setTextSize(2);             
+        oled.setTextColor(SSD1306_WHITE);
+        oled.print(freqInst);
+        oled.print("Hz");
+        break;
+    }
+  }
 
   // Exibe informações no OLED
   oled.display();
@@ -366,7 +431,7 @@ void ExibirNivelAcumulado()
   oled.drawRect(2, 16, 124, 18, SSD1306_WHITE);
 
   // Nível Setpoint
-  oled.setCursor(90, 39);
+  oled.setCursor(90, 37);
   oled.setTextSize(1);             
   oled.setTextColor(SSD1306_WHITE);
   oled.print(nivelSP);
@@ -632,11 +697,11 @@ void ReadPcf8574Inputs()
       // Realiza o incremento através do botão de função atribuida
       if(joystickBotaoPressionado == "Up")
       {
-        
+        menuLinha--;
       }
       else if(joystickBotaoPressionado == "Down")
       {
-
+        menuLinha++;
       }
       else if(joystickBotaoPressionado == "Left")
       {
@@ -648,13 +713,15 @@ void ReadPcf8574Inputs()
       }
       else if(joystickBotaoPressionado == "Mid")
       {
+        // Se o cursor estiver na pagina zero
         if(menuPagina == 0)
         {
+          // Entao apresenta a pagina que define o valor do SetPoint
           menuPagina = menuPagina + 10;
         }
-        else if(menuPagina == 10)
+        else if(menuPagina == 10) // Se estiver na pagina que define o SetPoint
         {
-          menuPagina = 0;
+          menuPagina = 0; // Entao retorna a pagina anterior
         }
       }
       else if(joystickBotaoPressionado == "Set")
