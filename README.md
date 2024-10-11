@@ -2,7 +2,7 @@
 Projeto apresentado no curso de IoT com ESP32 na UTD - Universidade do Trabalho Digital do Ceará. 
 
 ## Objetivo
-Realizar, através do ESP32, o controle de nível didático integrando os periféricos como Medidor de Vazão YF-S201, display OLED, PCF8574 e um Joystick de botões.
+Realizar, de modo didático, o controle de nível com o ESP32 integrando os periféricos como Medidor de Vazão YF-S201, display OLED, PCF8574 e um Joystick de botões.
 
 ## Autor
 - [Felipe Figueiredo Bezerra](https://github.com/FigFelipe)
@@ -72,5 +72,31 @@ Por padrão, o módulo de display OLED utiliza o valor de 0x3C como endereçamen
 
 ### 4. Medidor de Vazão YF-S201
 
-O medidor é simulado digitalmente, através da variação de geração de pulsos em um GPIO do ESP32.
+No YF-S201, a variação da frequencia (Hz) de saída determina a vazão instantânea (Litros/Hora). Temos então os dados fornecido no datasheet do YF-S201:
+
+> **Observação:**
+O medidor é simulado digitalmente, através da geração de pulsos em um GPIO 2 de um outro ESP32. Para maiores informações, consultar o arquivo 'Projeto_Oscilador.ino'.
+
+| Vazão (L/H) | Freq. (Hz) |
+|-------------|------------|
+| 120         | 16         |
+| 240         | 32,5       |
+| 360         | 49,3       |
+| 480         | 65,5       |
+| 600         | 82         |
+| 720         | 90.2       |
+
+Aplicando o método de regressão linear (considerando um erro de +/-5%), obtemos a seguinte equação característica da resposta do medidor de vazão:
+
+> **y = 0,1275x + 2,347**
+
+### 4.1 Frequência [Hz]
+Substituindo os termos x e y na equação, temos:
+> **Frequência[Hz]** = ( 0,1275 * Vazão [L/H] ) + 2,347
+
+### 4.2 Vazão [L/H]
+Substituindo os termos x e y na equação, temos:
+> **Vazão[L/H]** = ( Frequência[Hz] - 2,347 ) / 0,1275
+
+
 
