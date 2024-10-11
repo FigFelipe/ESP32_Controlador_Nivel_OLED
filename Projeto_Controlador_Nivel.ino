@@ -110,6 +110,7 @@ int menuPagina = 0;
 int menuLinha = 0;
 
 float nivelSP = 0;
+bool flagNivelSP = false;     // Indica que o valor do Setpoint foi alcancado
 bool statusProcesso = false;  // Indicador do processo (RUN, STOP)
 
 int valorBarraProgresso = 0;
@@ -165,6 +166,7 @@ void IRAM_ATTR IsrTempo()
 // Métodos
 //---------------------------------------//
 
+// Realiza a leitura da frequencia de pulsos recebida do Medido de Vazao durante o intervalo de 1s
 void FrequenciaMedidorVazao()
 {
   // Se o flag acionado pelo ISR MedidorVazao
@@ -242,6 +244,15 @@ void FrequenciaInstantanea()
 
 void ControleAutomacao()
 {
+
+  // Se a vazaoAcumulada for maior ou igual ao SetPoint de Nível
+  if(nivelSP != 0 && vazaoAcumuladaLitro >= nivelSP)
+  {
+    flagIgnorarPulsos = true;  // Nao contabilizar os pulsos recebidos no ISR INT
+    statusProcesso = false;     // Sinalizar que o processo está em modo STOP
+    flagNivelSP = true;
+  }
+  
   if(statusProcesso)
   {
     // Sinaliza o acionamento do motor via led rgb
@@ -259,8 +270,8 @@ void ControleAutomacao()
     digitalWrite(ledBlue, LOW);
 
     alreadyDraw = false;
-
   }
+  
 }
 
 void ExibirTempoDecorrido()
@@ -309,7 +320,7 @@ void ExibirVazaoInstantanea()
   oled.print("mL/s");
 
   // Exibe informações no OLED
-  oled.display();;
+  oled.display();
 }
 
 void ExibirNivelSetpoint()
@@ -443,7 +454,7 @@ void ExibirBarraProgresso()
   // Exibe informações no OLED
   oled.display();
 
-  Serial.printf("\n[VP]%i", valorBarraProgresso);
+  //Serial.printf("\n[Valor Pixel]%i", valorBarraProgresso);
 
 }
 
@@ -648,13 +659,24 @@ void ReadPcf8574Inputs()
       }
       else if(joystickBotaoPressionado == "Set")
       {
-        statusProcesso = true;
-        alreadyDraw = false;
+        // Permitir iniciar o processo somente se o SetPoint for maior que ZERO
+        if(nivelSP > 0 && flagNivelSP == false)
+        {
+          statusProcesso = true;
+          alreadyDraw = false;
+          flagIgnorarPulsos = false;
+        }
+        else
+        {
+          Serial.println("\n[INFO] Não foi possível iniciar o processo pois o SP é igual á ZERO.");
+        }
+        
       }
       else if(joystickBotaoPressionado == "Reset")
       {
         statusProcesso = false;
         alreadyDraw = false;
+        flagIgnorarPulsos = true;
       }
 
       // Debug para acompanhamento
