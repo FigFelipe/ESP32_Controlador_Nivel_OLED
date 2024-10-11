@@ -219,9 +219,9 @@ void VazaoInstantanea()
   // --> Freq[Hz] = 0.1275 * Vazao[L/H] + 2.347
   
   // Logo:
-  // --> Vazao[L/H] = (Freq[Hz] - 1.49) / 0.128
+  // --> Vazao[L/H] = (Freq[Hz] - 2.347) / 0.1275
 
-  vazaoInstLitroHora = (quantidadePulsos - 1.49) / 0.128; // Unidade: L/h
+  vazaoInstLitroHora = (quantidadePulsos - 2.347) / 0.1275; // Unidade: L/h
  
   // Evitar divisao por ZERO
   if(vazaoInstLitroHora > 0)
@@ -248,7 +248,7 @@ void FrequenciaInstantanea()
 {
   // y = 0.1275x + 2.347
   // Freq[Hz] = 0.1275 * Vazao[L/H] + 2.347
-  freqInst = 0.1275 * vazaoInstLitroHora + 2.437;
+  freqInst = 0.1275 * vazaoInstLitroHora + 2.347;
 
   // Devido ao ruído no GPIO 4, considerar o erro de 1% (2Hz)
   if(freqInst <= 2)
@@ -772,7 +772,7 @@ void ReadPcf8574Inputs()
         }
         else
         {
-          Serial.println("\n[INFO] Não foi possível iniciar o processo pois PV = SP.");
+          Serial.println("\n[INFO] Não foi possível iniciar o processo pois PV = SP");
         }
         
       }
