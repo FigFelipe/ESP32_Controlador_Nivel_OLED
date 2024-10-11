@@ -85,6 +85,7 @@ O medidor é simulado digitalmente, através da geração de pulsos em um GPIO 2
 | 480         | 65,5       |
 | 600         | 82         |
 | 720         | 90.2       |
+| 1800        | 232 (máx)  |
 
 Aplicando o método de regressão linear (considerando um erro de +/-5%), obtemos a seguinte equação característica da resposta do medidor de vazão:
 
@@ -97,6 +98,5 @@ Substituindo os termos x e y na equação, temos:
 ### 4.2 Vazão [L/H]
 Substituindo os termos x e y na equação, temos:
 > **Vazão[L/H]** = ( Frequência[Hz] - 2,347 ) / 0,1275
-
 
 
