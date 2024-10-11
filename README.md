@@ -100,7 +100,7 @@ Substituindo os termos x e y na equação, temos:
 > **Vazão[L/H]** = ( Frequência[Hz] - 2,347 ) / 0,1275
 
 ### 4.3 Taxa de Atualização
-Será utilizado uma taxa de atualização de 1 segundo (T = 1), onde dentro desse intervalo do período é realizada a contagem da quantidade de pulsos na entrada do GPIO 4 (ISR INT). Portanto, o valor pulsos recebida logo é a frequencia obtida.
+Será utilizada uma taxa de atualização de 1 segundo (T = 1). Dentro desse intervalo do período é realizada a contagem da quantidade de pulsos na entrada do GPIO 4 (ISR INT). Portanto, a frequência obtida é igual a quantidade de pulsos.
 > **Freq.[Hz]** = 1 / T
 
 
