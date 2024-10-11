@@ -75,7 +75,15 @@ hw_timer_t *Tempo = NULL; // Timer
 
 String joystickBotaoPressionado;                // Nome do botão pressionado (Up, Down, Left, Right, Set e Reset)
 volatile bool exibirBotaoPressionado = false;   // Flag de evento, para somente quando algum botao do Joystick for acionado
-volatile int eventosInterrupcao = 0;
+volatile int eventosInterrupcao = 0;            // Variável que realiza o debounce do INT do PCF8574
+
+bool botaoUp = false;
+bool botaoDown = false;
+bool botaoLeft = false;
+bool botaoRight = false;
+bool botaoMid = false;
+bool botaoSet = false;
+bool botaoReset = false;
 
 unsigned volatile long quantidadePulsos = 0;
 volatile bool flagLerFrequenciaPulsos = false;
@@ -100,6 +108,13 @@ int frequencia = 0;       // Valor calculado com base na leitura do canal ADC
 volatile bool flagAtualizaOled = false;
 int menuPagina = 0;
 int menuLinha = 0;
+
+float nivelSP = 0;
+bool statusProcesso = false;  // Indicador do processo (RUN, STOP)
+
+int valorBarraProgresso = 0;
+
+volatile bool alreadyDraw = false;
 
 //---------------------------------------//
 // Interrupções - ISR
@@ -227,7 +242,25 @@ void FrequenciaInstantanea()
 
 void ControleAutomacao()
 {
+  if(statusProcesso)
+  {
+    // Sinaliza o acionamento do motor via led rgb
+    digitalWrite(ledRed, LOW);
+    digitalWrite(ledGreen, HIGH);
+    digitalWrite(ledBlue, LOW);
 
+    alreadyDraw = false;
+  }
+  else
+  {
+    // Sinaliza o acionamento do motor via led rgb
+    digitalWrite(ledRed, HIGH);
+    digitalWrite(ledGreen, LOW);
+    digitalWrite(ledBlue, LOW);
+
+    alreadyDraw = false;
+
+  }
 }
 
 void ExibirTempoDecorrido()
@@ -235,10 +268,16 @@ void ExibirTempoDecorrido()
   // Como apagar somente uma determinada regiao
   // desenhar um fillRectangle invertido
   oled.fillRect(0, 0, 80, 12, SSD1306_BLACK);   // Apaga somente a linha superior
-  oled.fillRect(4, 39, 120, 24, SSD1306_BLACK); // Apaga o conteudo do tempo decorrido
+  oled.fillRect(0, 39, 128, 24, SSD1306_BLACK); // Apaga o conteudo do tempo decorrido
+
+  // Linha superior
+  oled.setCursor(0,0);             // Start at top-left corner
+  oled.setTextSize(1);             // Normal 1:1 pixel scale
+  oled.setTextColor(SSD1306_WHITE);        // Draw white text
+  oled.println(F("Duracao:"));
 
   // Nível Acumulado
-  oled.setCursor(40, 45);
+  oled.setCursor(10, 45);
   oled.setTextSize(2);             
   oled.setTextColor(SSD1306_WHITE);
   oled.print("00:00:00");
@@ -254,7 +293,7 @@ void ExibirVazaoInstantanea()
   // Como apagar somente uma determinada regiao
   // desenhar um fillRectangle invertido
   oled.fillRect(0, 0, 80, 12, SSD1306_BLACK);   // Apaga somente a linha superior
-  oled.fillRect(4, 39, 120, 24, SSD1306_BLACK); // Apaga o conteudo da vazao instantanea
+  oled.fillRect(0, 39, 128, 24, SSD1306_BLACK); // Apaga o conteudo da vazao instantanea
 
   // Linha superior
   oled.setCursor(0,0);             // Start at top-left corner
@@ -263,14 +302,40 @@ void ExibirVazaoInstantanea()
   oled.println(F("Vazao Inst:"));
 
   // Nível Acumulado
-  oled.setCursor(40, 45);
+  oled.setCursor(2, 45);
   oled.setTextSize(2);             
   oled.setTextColor(SSD1306_WHITE);
-  oled.print("0");
-  oled.print("L/h");
+  oled.print(vazaoInstMililitroSegundo);
+  oled.print("mL/s");
 
   // Exibe informações no OLED
   oled.display();;
+}
+
+void ExibirNivelSetpoint()
+{
+  // Como apagar somente uma determinada regiao
+  // desenhar um fillRectangle invertido
+  oled.fillRect(0, 0, 80, 12, SSD1306_BLACK);   // Apaga somente a linha superior
+  oled.fillRect(0, 12, 127, 63, SSD1306_BLACK); // Apaga o conteúdo da informação sobre o nível acumulado 
+  
+  // Linha superior
+  oled.setCursor(0,0);             // Start at top-left corner
+  oled.setTextSize(1);             // Normal 1:1 pixel scale
+  oled.setTextColor(SSD1306_WHITE);        // Draw white text
+  oled.println(F("SP Nivel:"));
+
+  // Nível Acumulado
+  oled.setCursor(30, 45);
+  oled.setTextSize(2);             
+  oled.setTextColor(SSD1306_WHITE);
+  oled.print(nivelSP);
+  oled.print("L");
+
+  // Exibe informações no OLED
+  oled.display();
+
+
 }
 
 void ExibirNivelAcumulado()
@@ -278,7 +343,7 @@ void ExibirNivelAcumulado()
   // Como apagar somente uma determinada regiao
   // desenhar um fillRectangle invertido
   oled.fillRect(0, 0, 80, 12, SSD1306_BLACK);   // Apaga somente a linha superior
-  oled.fillRect(4, 39, 120, 24, SSD1306_BLACK); // Apaga o conteúdo da informação sobre o nível acumulado 
+  oled.fillRect(0, 38, 127, 63, SSD1306_BLACK); // Apaga o conteúdo da informação sobre o nível acumulado 
 
   // Linha superior
   oled.setCursor(0,0);             // Start at top-left corner
@@ -286,11 +351,21 @@ void ExibirNivelAcumulado()
   oled.setTextColor(SSD1306_WHITE);        // Draw white text
   oled.println(F("Nivel Total:"));
 
+  // Retangulo
+  oled.drawRect(2, 16, 124, 18, SSD1306_WHITE);
+
+  // Nível Setpoint
+  oled.setCursor(90, 39);
+  oled.setTextSize(1);             
+  oled.setTextColor(SSD1306_WHITE);
+  oled.print(nivelSP);
+  oled.print("L");
+
   // Nível Acumulado
-  oled.setCursor(40, 45);
+  oled.setCursor(4, 45);
   oled.setTextSize(2);             
   oled.setTextColor(SSD1306_WHITE);
-  oled.print("0");
+  oled.print(vazaoAcumuladaLitro);
   oled.print("L");
 
   // Exibe informações no OLED
@@ -300,12 +375,6 @@ void ExibirNivelAcumulado()
 void MenuPrincipal()
 {
   oled.clearDisplay();
-
-   // Texto 'Run/Stop'
-  oled.setCursor(90, 0);             // Start at top-left corner
-  oled.setTextSize(1);             // Normal 1:1 pixel scale
-  oled.setTextColor(SSD1306_BLACK, SSD1306_WHITE);        // Draw white text
-  oled.println(F("[STOP]"));
 
   // Linha superior
   oled.setCursor(0,0);             // Start at top-left corner
@@ -321,6 +390,63 @@ void MenuPrincipal()
   //delay(5);
 }
 
+// Exibe a mensagem de RUN ou STOP
+void ExibirStatusProcesso()
+{
+  // Como apagar somente uma determinada regiao
+  // desenhar um fillRectangle invertido
+  oled.fillRect(85, 0, 128, 12, SSD1306_BLACK);   // Apaga somente o texto RUN OU STOP
+
+  if(statusProcesso)
+  {
+    // Texto 'RUN'
+    oled.setCursor(90, 0);             // Start at top-left corner
+    oled.setTextSize(1);             // Normal 1:1 pixel scale
+    oled.setTextColor(SSD1306_WHITE);        // Draw white text
+    oled.println(F(" RUN "));
+  }
+  else
+  {
+    // Texto 'STOP'
+    oled.setCursor(90, 0);             // Start at top-left corner
+    oled.setTextSize(1);             // Normal 1:1 pixel scale
+    oled.setTextColor(SSD1306_BLACK, SSD1306_WHITE);        // Draw white text
+    oled.println(F(" STOP "));
+  }
+
+  // Exibe informações no OLED
+  oled.display();
+}
+
+void ExibirBarraProgresso()
+{
+  // SP  | Progresso (px) |
+  // 10  |    120         |
+  // 0   |    4           |
+
+  // Evitar a divisao por ZERO
+  if(nivelSP > 0)
+  {
+    valorBarraProgresso = 120 * vazaoAcumuladaLitro / nivelSP;
+  }
+  else
+  {
+    valorBarraProgresso = 0;
+  }
+
+  // Retangulo 100%
+  //oled.fillRect(4, 18, 120, 14, SSD1306_WHITE);
+
+  // Desenhar a barra de progresso
+  oled.fillRect(4, 18, valorBarraProgresso, 14, SSD1306_WHITE);
+
+  // Exibe informações no OLED
+  oled.display();
+
+  Serial.printf("\n[VP]%i", valorBarraProgresso);
+
+}
+
 void MenuNavegacao()
 {
   if(flagAtualizaOled) // Atualiza o conteúdo do OLED a cada 1s
@@ -329,10 +455,19 @@ void MenuNavegacao()
     {
       menuPagina = 0;
     }
-    else if(menuPagina > 2)
+    else if(menuPagina > 2 && menuPagina < 10)
     {
       menuPagina = 2;
     }
+
+    // Exibe o status do processo caso houver modificação
+    if(!alreadyDraw)
+    {
+      ExibirStatusProcesso();
+      alreadyDraw = true;
+    }
+
+    ExibirBarraProgresso();
 
     switch(menuPagina)
     {
@@ -347,6 +482,11 @@ void MenuNavegacao()
       case 2:
         ExibirTempoDecorrido();
         break;
+
+      case 10:
+        ExibirNivelSetpoint();
+        break;
+
     }
 
     flagAtualizaOled = false; // Reset do flag
@@ -406,10 +546,38 @@ void ReadPcf8574Inputs()
   if(di.p1 == LOW)
   {
     joystickBotaoPressionado = "Up";
+
+    if(menuPagina == 10)
+    {
+      // Define o status do processo como STOP
+      statusProcesso = false;
+
+      nivelSP = nivelSP + 0.1;
+
+      // Previnir o overflow
+      if(nivelSP > 9999)
+      {
+        nivelSP = 9999;
+      }
+    }
   }
   else if(di.p2 == LOW)
   {
     joystickBotaoPressionado = "Down";
+
+    if(menuPagina == 10)
+    {
+      // Define o status do processo como STOP
+      statusProcesso = false;
+
+      nivelSP = nivelSP - 0.1;
+
+      // Previnir o overflow
+      if(nivelSP < 0)
+      {
+        nivelSP = 0;
+      }
+    }
   }
   else if(di.p3 == LOW)
   {
@@ -449,9 +617,51 @@ void ReadPcf8574Inputs()
     if(joystickBotaoPressionado != "None") 
     {
       Serial.printf("\nJoystick: %s", joystickBotaoPressionado);
+
+      // Realiza o incremento através do botão de função atribuida
+      if(joystickBotaoPressionado == "Up")
+      {
+        
+      }
+      else if(joystickBotaoPressionado == "Down")
+      {
+
+      }
+      else if(joystickBotaoPressionado == "Left")
+      {
+        menuPagina--;
+      }
+      else if(joystickBotaoPressionado == "Right")
+      {
+        menuPagina++;
+      }
+      else if(joystickBotaoPressionado == "Mid")
+      {
+        if(menuPagina == 0)
+        {
+          menuPagina = menuPagina + 10;
+        }
+        else if(menuPagina == 10)
+        {
+          menuPagina = 0;
+        }
+      }
+      else if(joystickBotaoPressionado == "Set")
+      {
+        statusProcesso = true;
+        alreadyDraw = false;
+      }
+      else if(joystickBotaoPressionado == "Reset")
+      {
+        statusProcesso = false;
+        alreadyDraw = false;
+      }
+
+      // Debug para acompanhamento
+      Serial.printf("\n[Pag]%i  [Linha]%i", menuPagina, menuLinha);
+      
     }
 
-   //Serial.printf("\n[Pag]%i  [Linha]%i", menuPagina, menuLinha);
    eventosInterrupcao = 0; 
    exibirBotaoPressionado = false;
     
@@ -552,7 +762,7 @@ void loop() {
   FrequenciaMedidorVazao();
 
   // Controle de navegação e exibição de Menus
-  //MenuNavegacao();
+  MenuNavegacao();
 
   // Controle de automação
   ControleAutomacao();
