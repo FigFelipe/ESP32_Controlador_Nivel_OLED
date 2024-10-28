@@ -29,8 +29,9 @@
 #define AlturaTela 64     // y
 
 // GPIO
-#define pcf8574Int 23      // Pino de interrupção do PCF8574 (ativo em nível ZERO)
-#define builtinLed 2       // Led onboard ESP32 Wroom shield
+#define pcf8574Int 23         // Pino de interrupção do PCF8574 (ativo em nível ZERO)
+#define builtinLed 2          // Led onboard ESP32 Wroom shield
+#define comandoStartStop 12   // Comando que inicia ou para o oscilador externo
 
 // LED RGB
 #define ledRed 19
@@ -172,8 +173,8 @@ void IRAM_ATTR IsrTempo()
 // Realiza a leitura da frequencia de pulsos recebida do Medido de Vazao durante o intervalo de 1s
 void FrequenciaMedidorVazao()
 {
-  // Se o flag acionado pelo ISR MedidorVazao
-  if(flagLerFrequenciaPulsos && !flagIgnorarPulsos)
+  // Se o flag acionado pelo ISR MedidorVazao && !flagIgnorarPulsos
+  if(flagLerFrequenciaPulsos)
   {
     
     VazaoInstantanea();       // Realiza o cálculo da vazao instantanea em Litros/Hora
@@ -267,6 +268,8 @@ void ControleAutomacao()
     flagIgnorarPulsos = true;  // Nao contabilizar os pulsos recebidos no ISR INT
     statusProcesso = false;     // Sinalizar que o processo está em modo STOP
     flagNivelSP = true;
+
+    digitalWrite(comandoStartStop, LOW);  // Coloca o oscilador externo em stop
   }
   
   if(statusProcesso)
@@ -769,6 +772,8 @@ void ReadPcf8574Inputs()
           statusProcesso = true;
           alreadyDraw = false;
           flagIgnorarPulsos = false;
+
+          digitalWrite(comandoStartStop, HIGH); // Coloca o oscilador externo em modo start
         }
         else
         {
@@ -781,10 +786,12 @@ void ReadPcf8574Inputs()
         statusProcesso = false;
         alreadyDraw = false;
         flagIgnorarPulsos = true;
+
+        digitalWrite(comandoStartStop, LOW);  // Coloca o oscilador externo em modo stop
       }
 
       // Debug para acompanhamento
-      Serial.printf("\n[Pag]%i  [Linha]%i", menuPagina, menuLinha);
+      //Serial.printf("\n[Pag]%i  [Linha]%i", menuPagina, menuLinha);
       
     }
 
@@ -804,10 +811,11 @@ void setup() {
   // Entradas
 
   // Saidas
-  pinMode(builtinLed, OUTPUT); // builtin led
-  pinMode(ledRed, OUTPUT);     // led RGB
-  pinMode(ledGreen, OUTPUT);   // led RGB
-  pinMode(ledBlue, OUTPUT);    // led RGB
+  pinMode(builtinLed, OUTPUT);        // builtin led
+  pinMode(ledRed, OUTPUT);            // led RGB
+  pinMode(ledGreen, OUTPUT);          // led RGB
+  pinMode(ledBlue, OUTPUT);           // led RGB
+  pinMode(comandoStartStop, OUTPUT);  // Oscilador externo
 
   // PinMode 'PCF8574'
   // Entradas
