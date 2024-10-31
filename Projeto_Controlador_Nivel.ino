@@ -17,6 +17,8 @@
 #include <PCF8574.h>            // PCF8574
 #include <Adafruit_SSD1306.h>   // Display OLED
 #include <Adafruit_GFX.h>       // Display OLED
+#include <WiFi.h>               // Conexão à rede WiFi
+#include <PubSubClient.h>       // MQTT Publisher/Subscriber 
 
 // Atribuições
 #define PCF8574_LOW_LATENCY //Define o PCF8475 no modo de trabalho de baixa latência
@@ -32,6 +34,9 @@
 #define pcf8574Int 23         // Pino de interrupção do PCF8574 (ativo em nível ZERO)
 #define builtinLed 2          // Led onboard ESP32 Wroom shield
 #define comandoStartStop 12   // Comando que inicia ou para o oscilador externo
+
+// BUILTIN-LED
+#define led 2
 
 // LED RGB
 #define ledRed 19
@@ -70,9 +75,22 @@ Adafruit_SSD1306 oled(LarguraTela, AlturaTela, &Wire, -1); // Objeto 'oled' do t
 
 hw_timer_t *Tempo = NULL; // Timer
 
+WiFiClient espClient;               // WiFi Client
+PubSubClient client(espClient);     // MQTT Client
+
 //---------------------------------------//
 // Variáveis
 //---------------------------------------//
+
+String clientId = "ESP32Client-CNR001-";
+const char* ssid = "Antonio Vilmar";             // Nome da rede WiFi (SSID), somente 2.4GHz
+const char* password = "12165047";               // Senha da rede WiFi
+const char* mqtt_server = "test.mosquitto.org";  // Endereço do Broker MQTT
+
+unsigned long lastMsg = 0;                      // Utilizado pelo Millis para armazenar o tempo da ultima mensagem
+#define MSG_BUFFER_SIZE	(50)
+char msg[MSG_BUFFER_SIZE];
+int value = 0;
 
 String joystickBotaoPressionado;                // Nome do botão pressionado (Up, Down, Left, Right, Set e Reset)
 volatile bool exibirBotaoPressionado = false;   // Flag de evento, para somente quando algum botao do Joystick for acionado
@@ -802,10 +820,148 @@ void ReadPcf8574Inputs()
   
 }
 
+void LocalizarESP()   // Metódo que localiza o ESP através do GPIO 2 (Builtin-led)
+{
+
+}
+
+//---------------------------------------//
+// MQTT Callback
+//---------------------------------------//
+
+void callback(char* topic, byte* payload, unsigned int length)
+{
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  
+  for (int i = 0; i < length; i++)
+  {
+    Serial.print((char)payload[i]);
+  }
+  
+  Serial.println();
+
+  // Se receber conteúdo do tópico 'localizarESP'
+  if(strcmp(topic, "localizarESP") == 0)
+  {
+    LocalizarESP();
+  }
+
+  // Switch on the BUILTIN-LED
+  if ((char)payload[0] == 'z')
+  {
+    digitalWrite(led, HIGH);
+    
+    client.publish("statusLed/Builtin", String(digitalRead(led)).c_str());
+  } 
+  else if((char)payload[0] == 'x')
+  {
+    digitalWrite(led, LOW);
+
+    client.publish("statusLed/Builtin", String(digitalRead(led)).c_str());
+
+  }
+
+  // Switch status on LED RGB
+  if ((char)payload[0] == 'a')
+  {
+    digitalWrite(ledGreen, HIGH);
+
+    client.publish("statusLed/Rgb", "0");
+
+  } 
+  else if((char)payload[0] == 'b')
+  {
+    digitalWrite(ledGreen, LOW);
+
+    client.publish("statusLed/Rgb", "1");
+  }
+
+}
+
+//---------------------------------------//
+// WiFi MQTT Reconnect
+//---------------------------------------//
+
+void reconnect() 
+{
+  // Loop until we're reconnected
+  while (!client.connected()) 
+  {
+    Serial.print("Attempting MQTT connection...");
+   
+    // Create a random client ID
+    clientId += String(random(0xffff), HEX);
+    
+    // Attempt to connect
+    if (client.connect(clientId.c_str())) 
+    {
+      Serial.println("connected");
+
+      Serial.print("Client ID: ");
+      Serial.println(clientId);
+
+      // Once connected, publish an announcement...
+      client.publish("nomeESP", "reconnecting");
+
+      // ... and resubscribe
+      client.subscribe("localizarESP");
+      client.subscribe("setpointNivel");
+
+
+    } 
+    else 
+    {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
+}
+
+//---------------------------------------//
+// Setup
+//---------------------------------------//
+
+void setup_wifi() 
+{
+  delay(10);
+  // We start by connecting to a WiFi network
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+
+  randomSeed(micros());
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   Serial.println("Hello, ESP32!");
+
+  // WiFi
+  setup_wifi();
+
+  // MQTT
+  client.setServer(mqtt_server, 1883);  // MQTT Broker, Port
+  client.setCallback(callback);         // MQTT Callback
 
   // PinMode 'ESP32'
   // Entradas
@@ -885,9 +1041,35 @@ void setup() {
   
 }
 
+//---------------------------------------//
+// Main Loop
+//---------------------------------------//
+
 void loop() {
   // put your main code here, to run repeatedly:
   //delay(20);
+
+  // Conecta à rede WiFi
+  if (!client.connected()) 
+  {
+    reconnect();
+  }
+
+  client.loop();
+
+  unsigned long now = millis();
+
+  if (now - lastMsg > 2000) 
+  {
+    lastMsg = now;
+    ++value;
+    snprintf (msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
+    //Serial.print("Publish message: ");
+    //Serial.println(msg);
+    client.publish("nomeESP", String(clientId).c_str());
+
+  }
+
 
   // Realiza a leitura das entradas do PCF8574
   ReadPcf8574Inputs();
