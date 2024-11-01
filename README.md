@@ -12,6 +12,9 @@ Realizar, de modo didático, o controle de nível com o ESP32 integrando os peri
  - **IDE**: Arduino IDE 2.3.3
  - **MCU:** Espressif ESP32-Wroom Dev Module
 
+## Arquitetura de Integração da Automação
+![Arquitetura da Automacao]([https://github.com/](https://github.com/FigFelipe/ESP32_Controlador_Nivel_OLED/blob/main/Arquitetura_automacao.JPG))
+
 ## Dispositivos
 
 ### 1. Módulo Joystick 5 Eixos
