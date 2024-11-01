@@ -93,6 +93,8 @@ char msg[MSG_BUFFER_SIZE];
 int value = 0;
 
 String mensagemDebug;                           // Mensagem de debug para o envio (publish) via MQTT
+volatile bool flagLocalizaLed = false;                 // Variavel para indicar o status do builtinLed
+volatile int quantidadeLocalizaLed = 0;            // Variavel que monitora a quantidade de oscilação do led
 
 String joystickBotaoPressionado;                // Nome do botão pressionado (Up, Down, Left, Right, Set e Reset)
 volatile bool exibirBotaoPressionado = false;   // Flag de evento, para somente quando algum botao do Joystick for acionado
@@ -184,6 +186,16 @@ void IRAM_ATTR IsrTempo()
   flagLerFrequenciaPulsos = true;
 
   flagAtualizaOled = true;
+
+  // Se o flag
+  if(flagLocalizaLed)
+  {
+    quantidadeLocalizaLed++;
+  }
+  else
+  {
+    quantidadeLocalizaLed = 0;
+  }
 }
 
 //---------------------------------------//
@@ -833,6 +845,22 @@ void ReadPcf8574Inputs()
 
 void LocalizarESP()   // Metódo que localiza o ESP através do GPIO 2 (Builtin-led)
 {
+  if(flagLocalizaLed && quantidadeLocalizaLed < 15)
+  {
+    if(quantidadeLocalizaLed % 2 == 0)
+    {
+      digitalWrite(led, HIGH);
+    }
+    else
+    {
+      digitalWrite(led,LOW);
+    }
+  }
+  else
+  {
+    flagLocalizaLed = false;
+    digitalWrite(led, LOW);
+  }  
 
 }
 
@@ -859,6 +887,7 @@ void callback(char* topic, byte* payload, unsigned int length)
   
   Serial.println();
   
+  //---TÓPICO --- //
   // Se receber conteúdo do tópico 'setpointNivel'
   if(strcmp(topic, "setpointNivel") == 0)
   {
@@ -869,11 +898,50 @@ void callback(char* topic, byte* payload, unsigned int length)
     //Serial.println(nivelSP);
   }
 
+  //---TÓPICO --- //
   // Se receber conteúdo do tópico 'localizarESP'
   if(strcmp(topic, "localizarESP") == 0)
   {
-    LocalizarESP();
+    flagLocalizaLed = true;
   }
+
+
+  //---TÓPICO --- //
+  // Se receber o conteudo do tópico 'iniciarProcesso'
+  if(strcmp(topic, "iniciarProcesso") == 0)
+  {
+    if(value == "true")
+    {
+        // Permitir iniciar o processo somente se o SetPoint for maior que ZERO
+        if(nivelSP > 0 && flagNivelSP == false)
+        {
+          statusProcesso = true;
+          alreadyDraw = false;
+          flagIgnorarPulsos = false;
+
+          digitalWrite(comandoStartStop, HIGH); // Coloca o oscilador externo em modo start
+        }
+        else
+        {
+          mensagemDebug = "Não foi possível iniciar o processo pois PV = SP";
+
+          // Publica a mensagem de debug via MQTT, topico 'debugInfo'
+          client.publish("debugInfo", String(mensagemDebug).c_str());
+
+          Serial.println("\n[INFO] Não foi possível iniciar o processo pois PV = SP");
+        }
+    }
+    else if(value == "false")
+    {
+      statusProcesso = false;
+      alreadyDraw = false;
+      flagIgnorarPulsos = true;
+
+      digitalWrite(comandoStartStop, LOW);  // Coloca o oscilador externo em modo stop
+    }
+    
+  }
+  
 
   // Switch on the BUILTIN-LED
   if ((char)payload[0] == 'z')
@@ -935,6 +1003,7 @@ void reconnect()
       // ... and resubscribe
       client.subscribe("localizarESP");
       client.subscribe("setpointNivel");
+      client.subscribe("iniciarProcesso");
 
 
     } 
@@ -1098,6 +1167,8 @@ void loop() {
 
   }
 
+  // Localiza o ESP via led builtin
+  LocalizarESP();
 
   // Realiza a leitura das entradas do PCF8574
   ReadPcf8574Inputs();
