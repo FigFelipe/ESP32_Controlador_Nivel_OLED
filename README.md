@@ -4,6 +4,8 @@ Projeto apresentado no curso de IoT com ESP32 na UTD - Universidade do Trabalho 
 ## Objetivo
 Realizar, de modo didático, o controle de nível com o ESP32 integrando os periféricos como Medidor de Vazão YF-S201, display OLED, PCF8574 e um Joystick de botões.
 
+Utilizar o Node-Red para a criação de dashboard e inscrição nos tópicos MQTT publicados pelo ESP32.
+
 ## Autor
 - [Felipe Figueiredo Bezerra](https://github.com/FigFelipe)
 
@@ -14,6 +16,10 @@ Realizar, de modo didático, o controle de nível com o ESP32 integrando os peri
 
 ## Arquitetura de Integração da Automação
 ![Arquitetura da Automacao](Arquitetura_automacao.JPG)
+
+## Flows (Node-Red)
+O arquivo 'flows.json' pode ser obtido nesse link do repositório ([Node-red flow scheme/flows.json](https://github.com/FigFelipe/ESP32_Controlador_Nivel_OLED/blob/main/Node-red%20flow%20scheme/flows.json)).
+
 
 ## Dispositivos
 
