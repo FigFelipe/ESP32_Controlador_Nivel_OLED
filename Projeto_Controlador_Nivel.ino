@@ -87,6 +87,10 @@ const char* ssid = "Antonio Vilmar";             // Nome da rede WiFi (SSID), so
 const char* password = "12165047";               // Senha da rede WiFi
 const char* mqtt_server = "test.mosquitto.org";  // Endereço do Broker MQTT
 
+char enderecoIp[16] = "";
+char ssidCharName[20] = "";
+long rssiValue = 0;
+
 unsigned long lastMsg = 0;                      // Utilizado pelo Millis para armazenar o tempo da ultima mensagem
 #define MSG_BUFFER_SIZE	(50)
 char msg[MSG_BUFFER_SIZE];
@@ -1000,6 +1004,24 @@ void reconnect()
       // Once connected, publish an announcement...
       client.publish("nomeESP", "reconnecting");
 
+      client.publish("nivelAcumulado", String(vazaoAcumuladaLitro).c_str());                   // Publica o 'vazaoAcumuladaLitro' no topico 'nivelAcumulado'
+
+      //client.publish("setpointNivel", String(nivelSP).c_str());                                // Publica o 'nivelSP' no topico 'setpointNivel'
+
+      client.publish("vazaoInstMililitroSegundo", String(vazaoInstMililitroSegundo).c_str());  // Publica o 'vazaoInstMililitroSegundo' no topico 'vazaoInstMililitroSegundo'
+      client.publish("vazaoInstLitroSegundo", String(vazaoInstLitroSegundo).c_str());          // Publica o 'vazaoInstLitroSegundo' no topico 'vazaoInstLitroSegundo'
+      client.publish("vazaoInstLitroHora", String(vazaoInstLitroHora).c_str());                // Publica o 'vazaoInstLitroHora' no topico 'vazaoInstLitroHora'
+
+      client.publish("frequenciaInst", String(freqInst).c_str());                              // Publica o 'freqInst' no topico 'frequenciaInst'
+
+      client.publish("duracaoSegundos", String(segundos).c_str());                             // Publica o 'segundos' no topico 'duracaoSegundos'
+      client.publish("duracaoMinutos", String(minutos).c_str());                               // Publica o 'minutos' no topico 'duracaoMinutos'
+      client.publish("duracaoHoras", String(horas).c_str());                                   // Publica o 'horas' no topico 'duracaoHoras'
+
+      client.publish("deviceLocalIp", String(enderecoIp).c_str());                             // Publica o 'enderecoIp' no topico 'localIp'
+      client.publish("rssiSignal", String(rssiValue).c_str());                                 // Publica o 'rssiValue' no topico 'rssiSignal'
+
+
       // ... and resubscribe
       client.subscribe("localizarESP");
       client.subscribe("setpointNivel");
@@ -1045,6 +1067,17 @@ void setup_wifi()
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+
+  // Retorna o endereço IP da conexão
+  IPAddress ip = WiFi.localIP();
+  sprintf(enderecoIp, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+
+  // dBm (decibel relative to a milliwatt)
+  // -30: sinal forte
+  // -90: sinal fraco
+  rssiValue = WiFi.RSSI();
+  Serial.printf("\n[WiFi] RSSI: %ddBm", rssiValue);
+
 }
 
 void setup() {
@@ -1155,7 +1188,7 @@ void loop() {
 
   unsigned long now = millis();
 
-  if (now - lastMsg > 2000) 
+  if (now - lastMsg > 2500) 
   {
     lastMsg = now;
     ++value;
@@ -1163,7 +1196,25 @@ void loop() {
     //Serial.print("Publish message: ");
     //Serial.println(msg);
 
-    client.publish("nomeESP", String(clientId).c_str());    // Publica o 'clientId' no topico 'nomeESP'
+    client.publish("nomeESP", String(clientId).c_str());                                     // Publica o 'clientId' no topico 'nomeESP'
+    
+    client.publish("nivelAcumulado", String(vazaoAcumuladaLitro).c_str());                   // Publica o 'vazaoAcumuladaLitro' no topico 'nivelAcumulado'
+
+    //client.publish("setpointNivel", String(nivelSP).c_str());                                // Publica o 'nivelSP' no topico 'setpointNivel'
+    
+    client.publish("vazaoInstMililitroSegundo", String(vazaoInstMililitroSegundo).c_str());  // Publica o 'vazaoInstMililitroSegundo' no topico 'vazaoInstMililitroSegundo'
+    client.publish("vazaoInstLitroSegundo", String(vazaoInstLitroSegundo).c_str());          // Publica o 'vazaoInstLitroSegundo' no topico 'vazaoInstLitroSegundo'
+    client.publish("vazaoInstLitroHora", String(vazaoInstLitroHora).c_str());                // Publica o 'vazaoInstLitroHora' no topico 'vazaoInstLitroHora'
+    
+    client.publish("frequenciaInst", String(freqInst).c_str());                              // Publica o 'freqInst' no topico 'frequenciaInst'
+
+    client.publish("duracaoSegundos", String(segundos).c_str());                             // Publica o 'segundos' no topico 'duracaoSegundos'
+    client.publish("duracaoMinutos", String(minutos).c_str());                               // Publica o 'minutos' no topico 'duracaoMinutos'
+    client.publish("duracaoHoras", String(horas).c_str());                                   // Publica o 'horas' no topico 'duracaoHoras'
+
+    client.publish("deviceLocalIp", String(enderecoIp).c_str());                             // Publica o 'enderecoIp' no topico 'localIp'
+    client.publish("rssiSignal", String(rssiValue).c_str());                                 // Publica o 'rssiValue' no topico 'rssiSignal'
+
 
   }
 
