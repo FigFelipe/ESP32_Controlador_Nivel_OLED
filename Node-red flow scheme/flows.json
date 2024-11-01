@@ -1,0 +1,3510 @@
+[
+    {
+        "id": "d46d7f72c7f2dd27",
+        "type": "tab",
+        "label": "@AssistenteTelegram Bot",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "9c82d473a01f1612",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "4. Menu de opções gerais",
+        "info": "",
+        "x": 210,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "f5d5f55a82cef23e",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "3. Exibir mensagem para contatos autorizados",
+        "info": "",
+        "x": 270,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "19eac29928e7d26b",
+        "type": "telegram receiver",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "saveDataDir": "",
+        "filterCommands": false,
+        "x": 250,
+        "y": 80,
+        "wires": [
+            [
+                "cec97008830d5998"
+            ],
+            [
+                "ac459cba2fad0286"
+            ]
+        ]
+    },
+    {
+        "id": "8d22779000f235a3",
+        "type": "function",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Contato Autorizado",
+        "func": "var chatId = msg.payload.chatId;\n\nmsg.payload = {\n    \"chatId\" : chatId,\n    \"type\" : \"message\",\n    \"content\" : String.fromCodePoint(0x1f44b) +\n                String.fromCodePoint(0x1f916) + ' Olá!\\n\\n' +\n                \"Seja bem vindo ao chatbot de automação de Nível!\\n\\n\" +\n                String.fromCodePoint(0x27a1, 0xfe0f) + ` Seu usuário está autorizado para utilizar os controles de automação do ESP32. \\n\\n` +\n                String.fromCodePoint(0x26a0, 0xfe0f) + ' Para maiores informações, acesse o link github do projeto:\\n' +\n                'https://github.com/FigFelipe/ESP32_Controlador_Nivel_OLED'\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 610,
+        "y": 360,
+        "wires": [
+            [
+                "f30c35a1f5683dd0"
+            ]
+        ]
+    },
+    {
+        "id": "8b6510a48b50878c",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "2. Exibir mensagem para contato NÃO autorizado",
+        "info": "",
+        "x": 280,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "6ea7da3f0e67bfca",
+        "type": "function",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Contato Não Autorizado",
+        "func": "var chatId = msg.payload.chatId;\n\nmsg.error = false;\n\n// Dialog\nmsg.payload.content = String.fromCodePoint(0x26d4) + \n                      '  Usuário(a) não autorizado(a).\\n' +\n                      '  Solicite autorização ao administrador do bot.';\nmsg.payload.type = \"message\";\n\nreturn  msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 200,
+        "wires": [
+            [
+                "4a9724c820390080"
+            ]
+        ]
+    },
+    {
+        "id": "1ae97b1136a9e91e",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "1. Ao receber mensagem via bot",
+        "info": "To find your Telegram user ID, you can follow these steps:\n\nUsing a Bot:\nOpen the Telegram app.\nIn the search bar, type @userinfobot.\nStart a chat with this bot by clicking on it and then tapping “Start”.\nThe bot will reply with your user ID along with other details like your first name and last name1.\nUsing Another Bot:\n\nYou can also use @getmyid_bot in a similar way. Search for it, start a chat, and it will provide your user ID.\nThese methods are quick and easy, and they work on both mobile and desktop versions of Telegram.",
+        "x": 230,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "c819bc20f83c5c9f",
+        "type": "link in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link in 1",
+        "links": [
+            "ac459cba2fad0286"
+        ],
+        "x": 185,
+        "y": 200,
+        "wires": [
+            [
+                "0a4f60829e8a64dd"
+            ]
+        ]
+    },
+    {
+        "id": "cec97008830d5998",
+        "type": "link out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link out 1",
+        "mode": "link",
+        "links": [
+            "df3aa5c4c6cec39c",
+            "099123c279992e3d"
+        ],
+        "x": 405,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "ac459cba2fad0286",
+        "type": "link out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link out 2",
+        "mode": "link",
+        "links": [
+            "c819bc20f83c5c9f"
+        ],
+        "x": 405,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "4a9724c820390080",
+        "type": "telegram sender",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 870,
+        "y": 200,
+        "wires": [
+            [
+                "029fa5a0483a1535"
+            ]
+        ]
+    },
+    {
+        "id": "df3aa5c4c6cec39c",
+        "type": "link in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link in 2",
+        "links": [
+            "cec97008830d5998"
+        ],
+        "x": 185,
+        "y": 360,
+        "wires": [
+            [
+                "14913e79b7fb1b23"
+            ]
+        ]
+    },
+    {
+        "id": "f30c35a1f5683dd0",
+        "type": "telegram sender",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 870,
+        "y": 360,
+        "wires": [
+            [
+                "029fa5a0483a1535",
+                "a7851017388721db"
+            ]
+        ]
+    },
+    {
+        "id": "029fa5a0483a1535",
+        "type": "debug",
+        "z": "d46d7f72c7f2dd27",
+        "name": "msg",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1070,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "747f5b3306106d44",
+        "type": "change",
+        "z": "d46d7f72c7f2dd27",
+        "name": "atendimentoAtivo = 0",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "atendimentoAtivo",
+                "tot": "flow"
+            },
+            {
+                "t": "set",
+                "p": "atendimentoAtivo",
+                "pt": "flow",
+                "to": "0",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 620,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0a4f60829e8a64dd",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se AtendimentoAtivo == 0",
+        "property": "atendimentoAtivo",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 350,
+        "y": 200,
+        "wires": [
+            [
+                "6ea7da3f0e67bfca",
+                "747f5b3306106d44"
+            ]
+        ]
+    },
+    {
+        "id": "00be0deff61fd6f1",
+        "type": "change",
+        "z": "d46d7f72c7f2dd27",
+        "name": "atendimentoAtivo = 1",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "atendimentoAtivo",
+                "tot": "flow"
+            },
+            {
+                "t": "set",
+                "p": "atendimentoAtivo",
+                "pt": "flow",
+                "to": "1",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 620,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "14913e79b7fb1b23",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se AtendimentoAtivo == 0",
+        "property": "atendimentoAtivo",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 350,
+        "y": 360,
+        "wires": [
+            [
+                "8d22779000f235a3",
+                "00be0deff61fd6f1"
+            ]
+        ]
+    },
+    {
+        "id": "84bdee0a2e6ac83e",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Reset manual do flag de 'atendimentoAtivo'",
+        "info": "",
+        "x": 260,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "c0e312fc4fd63b86",
+        "type": "inject",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 280,
+        "y": 540,
+        "wires": [
+            [
+                "8c28d43bb84639bd",
+                "2ef492af244ea825"
+            ]
+        ]
+    },
+    {
+        "id": "8c28d43bb84639bd",
+        "type": "change",
+        "z": "d46d7f72c7f2dd27",
+        "name": "atendimentoAtivo = 0",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "atendimentoAtivo",
+                "tot": "flow"
+            },
+            {
+                "t": "set",
+                "p": "atendimentoAtivo",
+                "pt": "flow",
+                "to": "0",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 620,
+        "y": 540,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "087db00157c39641",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se AtendimentoAtivo == 1",
+        "property": "atendimentoAtivo",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 350,
+        "y": 680,
+        "wires": [
+            [
+                "c57ea1d89b677816"
+            ]
+        ]
+    },
+    {
+        "id": "a7851017388721db",
+        "type": "link out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link out 3",
+        "mode": "link",
+        "links": [
+            "5332060b9bf9ad68"
+        ],
+        "x": 1045,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "5332060b9bf9ad68",
+        "type": "link in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link in 3",
+        "links": [
+            "a7851017388721db"
+        ],
+        "x": 195,
+        "y": 680,
+        "wires": [
+            [
+                "087db00157c39641"
+            ]
+        ]
+    },
+    {
+        "id": "c57ea1d89b677816",
+        "type": "delay",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "3",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 560,
+        "y": 680,
+        "wires": [
+            [
+                "0b90a313fb2a66cd"
+            ]
+        ]
+    },
+    {
+        "id": "0b90a313fb2a66cd",
+        "type": "function",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Exibir o menu principal",
+        "func": "var chatId = msg.payload.chatId;\nvar botoes = [];\n\nbotoes.push(\n    [\n        {\n            text : \"Nome do ESP32\",\n            callback_data : \"/nomeESP\"\n        },\n\n        {\n            text: \"Localizar ESP32\",\n            callback_data: \"/localizarESP\"\n        },\n\n        {\n            text: \"Definir nível SP\",\n            callback_data: \"/setpointNivel\"\n        },\n\n        {\n            text : \"Obter variáveis do processo\",\n            callback_data : \"/variaveis\"\n        },\n        \n        {\n            text : \"Start\",\n            callback_data : \"/iniciarProcesso\"\n        },\n\n        {\n            text : \"Stop\",\n            callback_data : \"/pararProcesso\"\n        },\n\n        {\n            text: \"Sair...\",\n            callback_data: \"/sair\"\n        },\n    ]\n);\n\nmsg.payload = {\n    type : \"message\",\n    content : \"Por favor, escolha um dos comandos abaixo:\",\n    chatId : chatId,\n    options : {\n        parse_mode : \"Markdown\",\n        reply_markup : JSON.stringify({\n            remove_keyboard : true,\n            inline_keyboard : botoes\n        })\n    }\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 680,
+        "wires": [
+            [
+                "2e4d064b78d7b87b"
+            ]
+        ]
+    },
+    {
+        "id": "2e4d064b78d7b87b",
+        "type": "telegram sender",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 990,
+        "y": 680,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "dd51c993c4e9eddc",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5. Callback Command e MQTT",
+        "info": "",
+        "x": 230,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "b3ec8d50586d8b38",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.1 /sair",
+        "info": "",
+        "x": 190,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "71c97b33048e11c8",
+        "type": "telegram command",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/sair",
+        "command": "/sair",
+        "description": "",
+        "registercommand": false,
+        "language": "",
+        "scope": "default",
+        "bot": "9feef461a32d9780",
+        "strict": false,
+        "hasresponse": true,
+        "useregex": false,
+        "removeregexcommand": false,
+        "outputs": 2,
+        "x": 230,
+        "y": 940,
+        "wires": [
+            [
+                "5f19be527511ea32"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "b5eac16d72120302",
+        "type": "change",
+        "z": "d46d7f72c7f2dd27",
+        "name": "atendimentoAtivo = 0",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "atendimentoAtivo",
+                "tot": "flow"
+            },
+            {
+                "t": "set",
+                "p": "atendimentoAtivo",
+                "pt": "flow",
+                "to": "0",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1160,
+        "y": 920,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5f19be527511ea32",
+        "type": "delay",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "3",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 960,
+        "y": 880,
+        "wires": [
+            [
+                "6102d7f712989770",
+                "b5eac16d72120302"
+            ]
+        ]
+    },
+    {
+        "id": "6102d7f712989770",
+        "type": "function",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Mensagem de saída",
+        "func": "var chatId = msg.payload.chatId;\n\nmsg.payload = {\n    \"chatId\" : chatId,\n    \"type\" : \"message\",\n    \"content\" : String.fromCodePoint(0x1f916) + \n                '  O atendimento foi finalizado. Até a próxima.'\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1160,
+        "y": 880,
+        "wires": [
+            [
+                "afd2a3e5b6ece2af"
+            ]
+        ]
+    },
+    {
+        "id": "afd2a3e5b6ece2af",
+        "type": "telegram sender",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 1390,
+        "y": 880,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6895277e638ef418",
+        "type": "telegram event",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "event": "callback_query",
+        "autoanswer": false,
+        "x": 260,
+        "y": 880,
+        "wires": [
+            [
+                "3339150b2bdadfde"
+            ]
+        ]
+    },
+    {
+        "id": "eb652e792268aacd",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se 'content' == '/sair'",
+        "property": "payload.content",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "/sair",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 740,
+        "y": 880,
+        "wires": [
+            [
+                "5f19be527511ea32"
+            ]
+        ]
+    },
+    {
+        "id": "3339150b2bdadfde",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se AtendimentoAtivo == 1",
+        "property": "atendimentoAtivo",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 490,
+        "y": 880,
+        "wires": [
+            [
+                "eb652e792268aacd"
+            ]
+        ]
+    },
+    {
+        "id": "460496c7c4796b4f",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.2 /nomeESP",
+        "info": "",
+        "x": 210,
+        "y": 1020,
+        "wires": []
+    },
+    {
+        "id": "c7ba4d11a7d91088",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.3 /localizarESP",
+        "info": "",
+        "x": 220,
+        "y": 1340,
+        "wires": []
+    },
+    {
+        "id": "dafc0c1635547b20",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.5 /variaveis - selecionar poucas mensagens devido ao tamanho do payload MQTT",
+        "info": "",
+        "x": 430,
+        "y": 2720,
+        "wires": []
+    },
+    {
+        "id": "7a99aaea72801441",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.6 /iniciarProcesso",
+        "info": "",
+        "x": 230,
+        "y": 3340,
+        "wires": []
+    },
+    {
+        "id": "4ffe532541709acb",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.7 /pararProcesso",
+        "info": "",
+        "x": 230,
+        "y": 3720,
+        "wires": []
+    },
+    {
+        "id": "7ce3e626473f062a",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.4 /nivelSP",
+        "info": "",
+        "x": 210,
+        "y": 1720,
+        "wires": []
+    },
+    {
+        "id": "a8f63d534cb6bc8d",
+        "type": "telegram command",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/nomeESP",
+        "command": "/nomeESP",
+        "description": "",
+        "registercommand": false,
+        "language": "",
+        "scope": "default",
+        "bot": "9feef461a32d9780",
+        "strict": false,
+        "hasresponse": true,
+        "useregex": false,
+        "removeregexcommand": false,
+        "outputs": 2,
+        "x": 240,
+        "y": 1140,
+        "wires": [
+            [
+                "d0b4d71b3deb1267"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "d0b4d71b3deb1267",
+        "type": "delay",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "3",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 960,
+        "y": 1080,
+        "wires": [
+            [
+                "15f7b90f34741906"
+            ]
+        ]
+    },
+    {
+        "id": "15f7b90f34741906",
+        "type": "function",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Mensagem de saída",
+        "func": "var chatId = msg.payload.chatId;\n\nmsg.payload = {\n    \"chatId\" : chatId,\n    \"type\" : \"message\",\n    \"content\" : String.fromCodePoint(0x1f916) +\n                String.fromCodePoint(0x270f, 0xfe0f) + \n                `  Nome do dispositivo (ESP32):  ${flow.get(\"clientNomeEsp\")}`\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1180,
+        "y": 1080,
+        "wires": [
+            [
+                "a1bc197980399407"
+            ]
+        ]
+    },
+    {
+        "id": "a1bc197980399407",
+        "type": "telegram sender",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 1450,
+        "y": 1080,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8416387d3dbf8536",
+        "type": "telegram event",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "event": "callback_query",
+        "autoanswer": false,
+        "x": 260,
+        "y": 1080,
+        "wires": [
+            [
+                "815e857cacbeda54"
+            ]
+        ]
+    },
+    {
+        "id": "e5bcaf451badb890",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se 'content' == '/nomeESP'",
+        "property": "payload.content",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "/nomeESP",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 760,
+        "y": 1080,
+        "wires": [
+            [
+                "d0b4d71b3deb1267"
+            ]
+        ]
+    },
+    {
+        "id": "815e857cacbeda54",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se AtendimentoAtivo == 1",
+        "property": "atendimentoAtivo",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 490,
+        "y": 1080,
+        "wires": [
+            [
+                "e5bcaf451badb890"
+            ]
+        ]
+    },
+    {
+        "id": "a27087632643f894",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.2.1 - Subscribe (read only) MQTT - Topico '/nomeESP'",
+        "info": "",
+        "x": 380,
+        "y": 1200,
+        "wires": []
+    },
+    {
+        "id": "08f56b985de1029e",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/nomeESP",
+        "topic": "nomeESP",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 320,
+        "y": 1260,
+        "wires": [
+            [
+                "c50aa25f8e4ceaf9"
+            ]
+        ]
+    },
+    {
+        "id": "c50aa25f8e4ceaf9",
+        "type": "change",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Escreve para a variável 'flow.clientNomeEsp'",
+        "rules": [
+            {
+                "t": "move",
+                "p": "payload",
+                "pt": "msg",
+                "to": "clientNomeEsp",
+                "tot": "flow"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 590,
+        "y": 1260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c7a27b4d7e570174",
+        "type": "telegram command",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/localizarESP",
+        "command": "/localizarESP",
+        "description": "",
+        "registercommand": false,
+        "language": "",
+        "scope": "default",
+        "bot": "9feef461a32d9780",
+        "strict": false,
+        "hasresponse": true,
+        "useregex": false,
+        "removeregexcommand": false,
+        "outputs": 2,
+        "x": 250,
+        "y": 1460,
+        "wires": [
+            [
+                "5f148d96335fe1c8"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "5f148d96335fe1c8",
+        "type": "delay",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "3",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1000,
+        "y": 1400,
+        "wires": [
+            [
+                "c32748919bce6272"
+            ]
+        ]
+    },
+    {
+        "id": "c32748919bce6272",
+        "type": "function",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Mensagem de saída",
+        "func": "var chatId = msg.payload.chatId;\n\nmsg.payload = {\n    \"chatId\" : chatId,\n    \"type\" : \"message\",\n    \"content\" : String.fromCodePoint(0x1f916) +\n                String.fromCodePoint(0x1f50d) + \n                `  Localizando o ESP32 através do LED onboard...`\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1200,
+        "y": 1400,
+        "wires": [
+            [
+                "4cc926aeb5654916"
+            ]
+        ]
+    },
+    {
+        "id": "4cc926aeb5654916",
+        "type": "telegram sender",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 1450,
+        "y": 1400,
+        "wires": [
+            [
+                "4a7dd2d72a0a4baa"
+            ]
+        ]
+    },
+    {
+        "id": "e1b37f0f8ad3cd82",
+        "type": "telegram event",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "event": "callback_query",
+        "autoanswer": false,
+        "x": 260,
+        "y": 1400,
+        "wires": [
+            [
+                "295b03027dfda070"
+            ]
+        ]
+    },
+    {
+        "id": "479ff5b9821c24af",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se 'content' == '/localizarESP'",
+        "property": "payload.content",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "/localizarESP",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 770,
+        "y": 1400,
+        "wires": [
+            [
+                "5f148d96335fe1c8"
+            ]
+        ]
+    },
+    {
+        "id": "295b03027dfda070",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se AtendimentoAtivo == 1",
+        "property": "atendimentoAtivo",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 490,
+        "y": 1400,
+        "wires": [
+            [
+                "479ff5b9821c24af"
+            ]
+        ]
+    },
+    {
+        "id": "0ad66c849a171e71",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.3.1 - Publish (write) MQTT - Topico '/localizarESP'",
+        "info": "",
+        "x": 370,
+        "y": 1520,
+        "wires": []
+    },
+    {
+        "id": "9d6d1bc908a7566a",
+        "type": "mqtt out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/localizarESP",
+        "topic": "localizarESP",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "453ffcdce8172332",
+        "x": 610,
+        "y": 1580,
+        "wires": []
+    },
+    {
+        "id": "4a7dd2d72a0a4baa",
+        "type": "link out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link out 4",
+        "mode": "link",
+        "links": [
+            "91b999bade3dfc0c"
+        ],
+        "x": 1595,
+        "y": 1400,
+        "wires": []
+    },
+    {
+        "id": "91b999bade3dfc0c",
+        "type": "link in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link in 4",
+        "links": [
+            "4a7dd2d72a0a4baa"
+        ],
+        "x": 265,
+        "y": 1580,
+        "wires": [
+            [
+                "19d0298bd8474794"
+            ]
+        ]
+    },
+    {
+        "id": "19d0298bd8474794",
+        "type": "change",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Envia o status True",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "true",
+                "tot": "bool"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 410,
+        "y": 1580,
+        "wires": [
+            [
+                "9d6d1bc908a7566a",
+                "d07f4ba21505e816"
+            ]
+        ]
+    },
+    {
+        "id": "d07f4ba21505e816",
+        "type": "debug",
+        "z": "d46d7f72c7f2dd27",
+        "name": "debug 13",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 600,
+        "y": 1640,
+        "wires": []
+    },
+    {
+        "id": "d1aecd3e3ea9b750",
+        "type": "telegram command",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/setpointNivel",
+        "command": "/setpointNivel",
+        "description": "",
+        "registercommand": false,
+        "language": "",
+        "scope": "default",
+        "bot": "9feef461a32d9780",
+        "strict": false,
+        "hasresponse": true,
+        "useregex": false,
+        "removeregexcommand": false,
+        "outputs": 2,
+        "x": 270,
+        "y": 1840,
+        "wires": [
+            [
+                "0ecb60a3c6f46267"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "0ecb60a3c6f46267",
+        "type": "delay",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "3",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1020,
+        "y": 1780,
+        "wires": [
+            [
+                "3e301589be82ebfc",
+                "b19c174b803664ec"
+            ]
+        ]
+    },
+    {
+        "id": "3e301589be82ebfc",
+        "type": "function",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Mensagem de saída",
+        "func": "var chatId = msg.payload.chatId;\n\nmsg.payload = {\n    \"chatId\" : chatId,\n    \"type\" : \"message\",\n    \"content\" : String.fromCodePoint(0x1f916) +\n                String.fromCodePoint(0x2753) +\n                `  Qual deverá ser o valor (em Litros) do SetPoint Nível?`\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1220,
+        "y": 1780,
+        "wires": [
+            [
+                "e95e08d07d0e1d36"
+            ]
+        ]
+    },
+    {
+        "id": "e95e08d07d0e1d36",
+        "type": "telegram sender",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 1470,
+        "y": 1780,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5c264fb98392a234",
+        "type": "telegram event",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "event": "callback_query",
+        "autoanswer": false,
+        "x": 280,
+        "y": 1780,
+        "wires": [
+            [
+                "34ae19c4783646b8"
+            ]
+        ]
+    },
+    {
+        "id": "85c3b5e56710a8de",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se 'content' == '/setpointNivel'",
+        "property": "payload.content",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "/setpointNivel",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 790,
+        "y": 1780,
+        "wires": [
+            [
+                "0ecb60a3c6f46267"
+            ]
+        ]
+    },
+    {
+        "id": "34ae19c4783646b8",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se AtendimentoAtivo == 1",
+        "property": "atendimentoAtivo",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 510,
+        "y": 1780,
+        "wires": [
+            [
+                "85c3b5e56710a8de"
+            ]
+        ]
+    },
+    {
+        "id": "7d59d92ca079bfab",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.4.3 - Publish (write) MQTT - Topico '/setpointNivel'",
+        "info": "",
+        "x": 390,
+        "y": 2520,
+        "wires": []
+    },
+    {
+        "id": "b3d047fce6924597",
+        "type": "mqtt out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/setpointNivel",
+        "topic": "setpointNivel",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "453ffcdce8172332",
+        "x": 420,
+        "y": 2580,
+        "wires": []
+    },
+    {
+        "id": "099123c279992e3d",
+        "type": "link in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link in 5",
+        "links": [
+            "cec97008830d5998"
+        ],
+        "x": 275,
+        "y": 1960,
+        "wires": [
+            [
+                "30b9208b9fa70f14"
+            ]
+        ]
+    },
+    {
+        "id": "078750acc58b78be",
+        "type": "debug",
+        "z": "d46d7f72c7f2dd27",
+        "name": "debug 14",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 400,
+        "y": 2640,
+        "wires": []
+    },
+    {
+        "id": "5e2daa86192239ac",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.4.1 - Regex",
+        "info": "",
+        "x": 268,
+        "y": 1900,
+        "wires": []
+    },
+    {
+        "id": "b19c174b803664ec",
+        "type": "change",
+        "z": "d46d7f72c7f2dd27",
+        "name": "validarSetpointNivel = 1",
+        "rules": [
+            {
+                "t": "set",
+                "p": "validarSetpointNivel",
+                "pt": "flow",
+                "to": "1",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1230,
+        "y": 1840,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "30b9208b9fa70f14",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se validarSetpointNivel == 1",
+        "property": "validarSetpointNivel",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 440,
+        "y": 1960,
+        "wires": [
+            [
+                "09a7753ab2a9057a",
+                "9e052f79fe83b3ee"
+            ]
+        ]
+    },
+    {
+        "id": "09a7753ab2a9057a",
+        "type": "function",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Valida via Regex o Nível informado",
+        "func": "var regex = /^\\d+$/;\n\nif (regex.test(msg.payload.content)) {\n    \n    if(msg.payload.content >= 0 && msg.payload.content <= 9999){\n        \n        flow.set(\"isValidoNivelSP\", true);\n    }\n\n} else {\n        flow.set(\"isValidoNivelSP\", false);\n}\n\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 1960,
+        "wires": [
+            [
+                "15588681a8b6d349"
+            ]
+        ]
+    },
+    {
+        "id": "79b8b0ef44e3f341",
+        "type": "change",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "isValidoNivelSP",
+                "pt": "flow",
+                "to": "false",
+                "tot": "bool"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 440,
+        "y": 2060,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1cb37e9d9d30334f",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.4.2 - Variaveis Auxiliares",
+        "info": "",
+        "x": 310,
+        "y": 2020,
+        "wires": []
+    },
+    {
+        "id": "9e052f79fe83b3ee",
+        "type": "debug",
+        "z": "d46d7f72c7f2dd27",
+        "name": "debug 15",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 2020,
+        "wires": []
+    },
+    {
+        "id": "5f55ad54bbdb8fb1",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "isValidoNivelSP (booleano)",
+        "info": "",
+        "x": 750,
+        "y": 1920,
+        "wires": []
+    },
+    {
+        "id": "8653f5c84f31243d",
+        "type": "change",
+        "z": "d46d7f72c7f2dd27",
+        "name": "validarSetPoint = 0",
+        "rules": [
+            {
+                "t": "set",
+                "p": "validarSetpointNivel",
+                "pt": "flow",
+                "to": "0",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 410,
+        "y": 2260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "731a7753dd1246d0",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.4.1.1 - Regex TRUE",
+        "info": "",
+        "x": 360,
+        "y": 2160,
+        "wires": []
+    },
+    {
+        "id": "1755901bdf93567b",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.4.1.2 - Regex FALSE",
+        "info": "",
+        "x": 360,
+        "y": 2340,
+        "wires": []
+    },
+    {
+        "id": "15588681a8b6d349",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "isValidoNivelSP (Q1 - True, Q2 - False)",
+        "property": "isValidoNivelSP",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "true",
+                "vt": "jsonata"
+            },
+            {
+                "t": "eq",
+                "v": "false",
+                "vt": "jsonata"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1130,
+        "y": 1960,
+        "wires": [
+            [
+                "baef88a11a04a82a"
+            ],
+            [
+                "1907f7a06fa6de6c"
+            ]
+        ]
+    },
+    {
+        "id": "baef88a11a04a82a",
+        "type": "link out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link out 5",
+        "mode": "link",
+        "links": [
+            "821f91f3ffc0dc8c"
+        ],
+        "x": 1375,
+        "y": 1940,
+        "wires": []
+    },
+    {
+        "id": "1907f7a06fa6de6c",
+        "type": "link out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link out 6",
+        "mode": "link",
+        "links": [
+            "a2d35884bb50fb24"
+        ],
+        "x": 1375,
+        "y": 2000,
+        "wires": []
+    },
+    {
+        "id": "821f91f3ffc0dc8c",
+        "type": "link in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link in 6",
+        "links": [
+            "baef88a11a04a82a"
+        ],
+        "x": 275,
+        "y": 2220,
+        "wires": [
+            [
+                "bc2f0a219d84bd37",
+                "8653f5c84f31243d"
+            ]
+        ]
+    },
+    {
+        "id": "bc2f0a219d84bd37",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se AtendimentoAtivo == 1",
+        "property": "atendimentoAtivo",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 430,
+        "y": 2220,
+        "wires": [
+            [
+                "fad41888d2a823cc",
+                "87ce7221221101d3"
+            ]
+        ]
+    },
+    {
+        "id": "fad41888d2a823cc",
+        "type": "delay",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "3",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 640,
+        "y": 2220,
+        "wires": [
+            [
+                "50f999cbb77fba8f"
+            ]
+        ]
+    },
+    {
+        "id": "50f999cbb77fba8f",
+        "type": "function",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Mensagem de saída",
+        "func": "var chatId = msg.payload.chatId;\n\nmsg.payload = {\n    \"chatId\" : chatId,\n    \"type\" : \"message\",\n    \"content\" : String.fromCodePoint(0x1f916) +\n                String.fromCodePoint(0x1f197) +\n                `  O valor informado de ${msg.payload.content} Litros foi definido para o SetPoint Nível.`\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 2220,
+        "wires": [
+            [
+                "fa83e0cb4e5fa8fa"
+            ]
+        ]
+    },
+    {
+        "id": "fa83e0cb4e5fa8fa",
+        "type": "telegram sender",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 1110,
+        "y": 2220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2ef492af244ea825",
+        "type": "change",
+        "z": "d46d7f72c7f2dd27",
+        "name": "validarSetpointNivel = 0",
+        "rules": [
+            {
+                "t": "set",
+                "p": "validarSetpointNivel",
+                "pt": "flow",
+                "to": "0",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 630,
+        "y": 580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a2d35884bb50fb24",
+        "type": "link in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link in 7",
+        "links": [
+            "1907f7a06fa6de6c"
+        ],
+        "x": 275,
+        "y": 2400,
+        "wires": [
+            [
+                "57bf00590d989618",
+                "d7dd2237e2243208"
+            ]
+        ]
+    },
+    {
+        "id": "57bf00590d989618",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se AtendimentoAtivo == 1",
+        "property": "atendimentoAtivo",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 430,
+        "y": 2400,
+        "wires": [
+            [
+                "436255efaf336dc6"
+            ]
+        ]
+    },
+    {
+        "id": "d7dd2237e2243208",
+        "type": "change",
+        "z": "d46d7f72c7f2dd27",
+        "name": "validarSetPoint = 1",
+        "rules": [
+            {
+                "t": "set",
+                "p": "validarSetpointNivel",
+                "pt": "flow",
+                "to": "1",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 410,
+        "y": 2440,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "436255efaf336dc6",
+        "type": "delay",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "3",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 640,
+        "y": 2400,
+        "wires": [
+            [
+                "0606df16988dce3a"
+            ]
+        ]
+    },
+    {
+        "id": "0606df16988dce3a",
+        "type": "function",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Mensagem de saída",
+        "func": "var chatId = msg.payload.chatId;\n\nmsg.payload = {\n    \"chatId\" : chatId,\n    \"type\" : \"message\",\n    \"content\" : String.fromCodePoint(0x1f916) +\n                String.fromCodePoint(0x274c) +\n                '  O valor informado não é válido para o SetPoint Nível.\\n\\n' +\n                'Dicas:\\n' +\n                '  1. Informe somente valores numéricos\\n' + \n                '  2. O valor numérico deve ser inteiro e positivo\\n' + \n                '  3. O valor numérico deve ser entre 0 e 9999\\n' + \n                '  4. Ou digite /sair para retornar ao menu principal\\n\\n' + \n                \n                'Vamos tentar novamente...'\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 2400,
+        "wires": [
+            [
+                "7c89b8151aad656a"
+            ]
+        ]
+    },
+    {
+        "id": "7c89b8151aad656a",
+        "type": "telegram sender",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 1110,
+        "y": 2400,
+        "wires": [
+            [
+                "3ca9a7df16248be1"
+            ]
+        ]
+    },
+    {
+        "id": "3ca9a7df16248be1",
+        "type": "link out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link out 7",
+        "mode": "link",
+        "links": [
+            "85f44d1133e1e9f7"
+        ],
+        "x": 1255,
+        "y": 2400,
+        "wires": []
+    },
+    {
+        "id": "85f44d1133e1e9f7",
+        "type": "link in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link in 8",
+        "links": [
+            "3ca9a7df16248be1"
+        ],
+        "x": 905,
+        "y": 1840,
+        "wires": [
+            [
+                "0ecb60a3c6f46267"
+            ]
+        ]
+    },
+    {
+        "id": "0da47c0815058b4f",
+        "type": "link out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link out 8",
+        "mode": "link",
+        "links": [
+            "5ac30bf82b46e7d0"
+        ],
+        "x": 875,
+        "y": 2280,
+        "wires": []
+    },
+    {
+        "id": "5ac30bf82b46e7d0",
+        "type": "link in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link in 9",
+        "links": [
+            "0da47c0815058b4f"
+        ],
+        "x": 285,
+        "y": 2580,
+        "wires": [
+            [
+                "b3d047fce6924597",
+                "078750acc58b78be"
+            ]
+        ]
+    },
+    {
+        "id": "87ce7221221101d3",
+        "type": "change",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "clientNivelSP",
+                "pt": "flow",
+                "to": "payload.content",
+                "tot": "msg"
+            },
+            {
+                "t": "move",
+                "p": "payload.content",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 660,
+        "y": 2280,
+        "wires": [
+            [
+                "0da47c0815058b4f"
+            ]
+        ]
+    },
+    {
+        "id": "7f7cef713547fecc",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.5.1 Nível acumulado (L)",
+        "info": "",
+        "x": 310,
+        "y": 2780,
+        "wires": []
+    },
+    {
+        "id": "16438aae27e98aec",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.5.2 Nível Setpoint (L)",
+        "info": "",
+        "x": 300,
+        "y": 2820,
+        "wires": []
+    },
+    {
+        "id": "1536b8421ee75134",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.5.3 Vazao instantanea (ml/s)",
+        "info": "",
+        "x": 320,
+        "y": 2860,
+        "wires": []
+    },
+    {
+        "id": "7c4c9410e2a8068a",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.5.4 Vazao instantanea (L/s)",
+        "info": "",
+        "x": 320,
+        "y": 2900,
+        "wires": []
+    },
+    {
+        "id": "ad080a155b954134",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.5.5 Vazao instantanea (L/h)",
+        "info": "",
+        "x": 320,
+        "y": 2940,
+        "wires": []
+    },
+    {
+        "id": "c2c8c3c67cd6b5ed",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.5.6 Freq. instantanea (Hz)",
+        "info": "",
+        "x": 320,
+        "y": 2980,
+        "wires": []
+    },
+    {
+        "id": "a63fc89c5a2cf2bb",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.5.7 Nome do cliente ESP32",
+        "info": "",
+        "x": 320,
+        "y": 3020,
+        "wires": []
+    },
+    {
+        "id": "4241e3fe1ff7d663",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.5.8 IP Local",
+        "info": "",
+        "x": 270,
+        "y": 3060,
+        "wires": []
+    },
+    {
+        "id": "07609d0fb10390f4",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.5.9 MAC Address (restrito)",
+        "info": "",
+        "x": 320,
+        "y": 3100,
+        "wires": []
+    },
+    {
+        "id": "b6b25c56d9c83db3",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.5.10 WiFi RSSI",
+        "info": "",
+        "x": 280,
+        "y": 3140,
+        "wires": []
+    },
+    {
+        "id": "051dd892452a2ea2",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.5.11 Segundos",
+        "info": "",
+        "x": 280,
+        "y": 3180,
+        "wires": []
+    },
+    {
+        "id": "e2b24358b748fb4f",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.5.12 Minutos",
+        "info": "",
+        "x": 280,
+        "y": 3220,
+        "wires": []
+    },
+    {
+        "id": "b81583d7534a2666",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.5.13 Horas",
+        "info": "",
+        "x": 270,
+        "y": 3260,
+        "wires": []
+    },
+    {
+        "id": "84388f487e694bed",
+        "type": "telegram command",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/iniciarProcesso",
+        "command": "/iniciarProcesso",
+        "description": "",
+        "registercommand": false,
+        "language": "",
+        "scope": "default",
+        "bot": "9feef461a32d9780",
+        "strict": false,
+        "hasresponse": true,
+        "useregex": false,
+        "removeregexcommand": false,
+        "outputs": 2,
+        "x": 280,
+        "y": 3460,
+        "wires": [
+            [
+                "f24bb23eb8314a0f"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "f24bb23eb8314a0f",
+        "type": "delay",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "3",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1000,
+        "y": 3400,
+        "wires": [
+            [
+                "b6bc488d3a5662b9"
+            ]
+        ]
+    },
+    {
+        "id": "b6bc488d3a5662b9",
+        "type": "function",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Mensagem de saída",
+        "func": "var chatId = msg.payload.chatId;\n\nmsg.payload = {\n    \"chatId\" : chatId,\n    \"type\" : \"message\",\n    \"content\" : String.fromCodePoint(0x1f916) +\n                String.fromCodePoint(0x1f7e2) +\n                `  Iniciado o abastecimento do tanque...`\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1180,
+        "y": 3400,
+        "wires": [
+            [
+                "8d1e2fbbc65b83af"
+            ]
+        ]
+    },
+    {
+        "id": "8d1e2fbbc65b83af",
+        "type": "telegram sender",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 1410,
+        "y": 3400,
+        "wires": [
+            [
+                "128e1a8a47781162"
+            ]
+        ]
+    },
+    {
+        "id": "18dbb459d2a92fc7",
+        "type": "telegram event",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "event": "callback_query",
+        "autoanswer": false,
+        "x": 280,
+        "y": 3400,
+        "wires": [
+            [
+                "4ff6920c419ae217"
+            ]
+        ]
+    },
+    {
+        "id": "4fd093eb8749c32c",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se 'content' == '/iniciarProcesso'",
+        "property": "payload.content",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "/iniciarProcesso",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 790,
+        "y": 3400,
+        "wires": [
+            [
+                "f24bb23eb8314a0f"
+            ]
+        ]
+    },
+    {
+        "id": "4ff6920c419ae217",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se AtendimentoAtivo == 1",
+        "property": "atendimentoAtivo",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 510,
+        "y": 3400,
+        "wires": [
+            [
+                "4fd093eb8749c32c"
+            ]
+        ]
+    },
+    {
+        "id": "00b07b2c154e7938",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.6.1 - Publish (write) MQTT - Topico '/iniciarProcesso'",
+        "info": "",
+        "x": 400,
+        "y": 3520,
+        "wires": []
+    },
+    {
+        "id": "d52dcceba0c09f0c",
+        "type": "mqtt out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/iniciarProcesso",
+        "topic": "iniciarProcesso",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "453ffcdce8172332",
+        "x": 580,
+        "y": 3580,
+        "wires": []
+    },
+    {
+        "id": "492e395aff12dd19",
+        "type": "link in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link in 10",
+        "links": [
+            "128e1a8a47781162"
+        ],
+        "x": 225,
+        "y": 3580,
+        "wires": [
+            [
+                "aece58792cf432a8"
+            ]
+        ]
+    },
+    {
+        "id": "aece58792cf432a8",
+        "type": "change",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Envia o status True",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "true",
+                "tot": "bool"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 370,
+        "y": 3580,
+        "wires": [
+            [
+                "d52dcceba0c09f0c",
+                "a54c039e27612a5f"
+            ]
+        ]
+    },
+    {
+        "id": "a54c039e27612a5f",
+        "type": "debug",
+        "z": "d46d7f72c7f2dd27",
+        "name": "debug 16",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 560,
+        "y": 3700,
+        "wires": []
+    },
+    {
+        "id": "128e1a8a47781162",
+        "type": "link out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link out 9",
+        "mode": "link",
+        "links": [
+            "492e395aff12dd19"
+        ],
+        "x": 1555,
+        "y": 3400,
+        "wires": []
+    },
+    {
+        "id": "48dbe5247889f435",
+        "type": "telegram command",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/pararProcesso",
+        "command": "/pararProcesso",
+        "description": "",
+        "registercommand": false,
+        "language": "",
+        "scope": "default",
+        "bot": "9feef461a32d9780",
+        "strict": false,
+        "hasresponse": true,
+        "useregex": false,
+        "removeregexcommand": false,
+        "outputs": 2,
+        "x": 300,
+        "y": 3840,
+        "wires": [
+            [
+                "580c50f91fc73df9"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "580c50f91fc73df9",
+        "type": "delay",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "3",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1020,
+        "y": 3780,
+        "wires": [
+            [
+                "199315da36b68a1f"
+            ]
+        ]
+    },
+    {
+        "id": "199315da36b68a1f",
+        "type": "function",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Mensagem de saída",
+        "func": "var chatId = msg.payload.chatId;\n\nmsg.payload = {\n    \"chatId\" : chatId,\n    \"type\" : \"message\",\n    \"content\" : String.fromCodePoint(0x1f916) +\n                String.fromCodePoint(0x1f6d1) +\n                `  Parando o abastecimento do tanque...`\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1200,
+        "y": 3780,
+        "wires": [
+            [
+                "1e50681bae0ba219"
+            ]
+        ]
+    },
+    {
+        "id": "1e50681bae0ba219",
+        "type": "telegram sender",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 1430,
+        "y": 3780,
+        "wires": [
+            [
+                "145d649670395c12"
+            ]
+        ]
+    },
+    {
+        "id": "e772493f7cce8f7a",
+        "type": "telegram event",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "bot": "9feef461a32d9780",
+        "event": "callback_query",
+        "autoanswer": false,
+        "x": 300,
+        "y": 3780,
+        "wires": [
+            [
+                "941d6c236d3063ea"
+            ]
+        ]
+    },
+    {
+        "id": "880d78cb1237dcf4",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se 'content' == '/pararProcesso'",
+        "property": "payload.content",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "/pararProcesso",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 810,
+        "y": 3780,
+        "wires": [
+            [
+                "580c50f91fc73df9"
+            ]
+        ]
+    },
+    {
+        "id": "941d6c236d3063ea",
+        "type": "switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Se AtendimentoAtivo == 1",
+        "property": "atendimentoAtivo",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 530,
+        "y": 3780,
+        "wires": [
+            [
+                "880d78cb1237dcf4"
+            ]
+        ]
+    },
+    {
+        "id": "a381133e613fa4c9",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.7.1 - Publish (write) MQTT - Topico '/iniciarProcesso'",
+        "info": "",
+        "x": 420,
+        "y": 3900,
+        "wires": []
+    },
+    {
+        "id": "2fa51927d29e7815",
+        "type": "mqtt out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/iniciarProcesso",
+        "topic": "iniciarProcesso",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "453ffcdce8172332",
+        "x": 620,
+        "y": 3960,
+        "wires": []
+    },
+    {
+        "id": "1546d67422ac6029",
+        "type": "link in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link in 11",
+        "links": [
+            "145d649670395c12"
+        ],
+        "x": 245,
+        "y": 3960,
+        "wires": [
+            [
+                "422c4229b651add6"
+            ]
+        ]
+    },
+    {
+        "id": "422c4229b651add6",
+        "type": "change",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Envia o status False",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "false",
+                "tot": "bool"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 400,
+        "y": 3960,
+        "wires": [
+            [
+                "2fa51927d29e7815",
+                "fd0f00b88b036617"
+            ]
+        ]
+    },
+    {
+        "id": "fd0f00b88b036617",
+        "type": "debug",
+        "z": "d46d7f72c7f2dd27",
+        "name": "debug 17",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 620,
+        "y": 4020,
+        "wires": []
+    },
+    {
+        "id": "145d649670395c12",
+        "type": "link out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "link out 10",
+        "mode": "link",
+        "links": [
+            "1546d67422ac6029"
+        ],
+        "x": 1575,
+        "y": 3780,
+        "wires": []
+    },
+    {
+        "id": "0c3dcf9a8d09da97",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "5.8 /debugInfo",
+        "info": "",
+        "x": 210,
+        "y": 4120,
+        "wires": []
+    },
+    {
+        "id": "7af6033622311d81",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/debugInfo",
+        "topic": "debugInfo",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 280,
+        "y": 4180,
+        "wires": [
+            [
+                "104be55497ec0270"
+            ]
+        ]
+    },
+    {
+        "id": "104be55497ec0270",
+        "type": "ui_toast",
+        "z": "d46d7f72c7f2dd27",
+        "position": "top right",
+        "displayTime": "6",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 470,
+        "y": 4180,
+        "wires": []
+    },
+    {
+        "id": "e9dc3e07d252f23f",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/nivelAcumulado",
+        "topic": "nivelAcumulado",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 540,
+        "y": 2780,
+        "wires": [
+            [
+                "d29132820b40a28a",
+                "216c8e410eedeba8",
+                "08fc76686d3d6b5c"
+            ]
+        ]
+    },
+    {
+        "id": "b669f6016f857da3",
+        "type": "debug",
+        "z": "d46d7f72c7f2dd27",
+        "name": "debug 18",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 3320,
+        "wires": []
+    },
+    {
+        "id": "9e0734e67f6bdf36",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/vazaoInstLitroSegundo",
+        "topic": "vazaoInstLitroSegundo",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 560,
+        "y": 2900,
+        "wires": [
+            [
+                "7385edcee3cdd7d9"
+            ]
+        ]
+    },
+    {
+        "id": "b5a946162501f0c5",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/vazaoInstMililitroSegundo",
+        "topic": "vazaoInstMililitroSegundo",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 570,
+        "y": 2860,
+        "wires": [
+            [
+                "fb4cce6517ab123b"
+            ]
+        ]
+    },
+    {
+        "id": "0ae9e39c7da2f924",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/vazaoInstLitroHora",
+        "topic": "vazaoInstLitroHora",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 550,
+        "y": 2940,
+        "wires": [
+            [
+                "1c91d61a7dff78c8"
+            ]
+        ]
+    },
+    {
+        "id": "b2c10801cbb5ae77",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/frequenciaInst",
+        "topic": "frequenciaInst",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 540,
+        "y": 2980,
+        "wires": [
+            [
+                "d38f41da0bd59d99"
+            ]
+        ]
+    },
+    {
+        "id": "c762983b8380eb0e",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/duracaoHoras",
+        "topic": "duracaoHoras",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 540,
+        "y": 3260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fe042bcd55f61327",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/duracaoMinutos",
+        "topic": "duracaoMinutos",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 540,
+        "y": 3220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a9651ba35c29c213",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/duracaoSegundos",
+        "topic": "duracaoSegundos",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 550,
+        "y": 3180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a0a587ced97a2bf1",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/nomeESP",
+        "topic": "nomeESP",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 520,
+        "y": 3020,
+        "wires": [
+            [
+                "32f0a88c6b0a3c73"
+            ]
+        ]
+    },
+    {
+        "id": "2b744e41cb02eb07",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/deviceLocalIp",
+        "topic": "deviceLocalIp",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 530,
+        "y": 3060,
+        "wires": [
+            [
+                "3cb869d2a1b28c0e"
+            ]
+        ]
+    },
+    {
+        "id": "c11ceadcd152a3bf",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/rssiSignal",
+        "topic": "rssiSignal",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 520,
+        "y": 3140,
+        "wires": [
+            [
+                "057690c42033af7e"
+            ]
+        ]
+    },
+    {
+        "id": "3b92bf2188c7c930",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/setpointNivel",
+        "topic": "setpointNivel",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 530,
+        "y": 2820,
+        "wires": [
+            [
+                "2bdbc87ff38b2687",
+                "216c8e410eedeba8"
+            ]
+        ]
+    },
+    {
+        "id": "2d7aaeae298acb69",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Dashboard (Temporário)",
+        "info": "",
+        "x": 1070,
+        "y": 2700,
+        "wires": []
+    },
+    {
+        "id": "d29132820b40a28a",
+        "type": "ui_text",
+        "z": "d46d7f72c7f2dd27",
+        "group": "6107215441735882",
+        "order": 9,
+        "width": 5,
+        "height": 1,
+        "name": "",
+        "label": "Nível Acumulado",
+        "format": "{{msg.payload}} L",
+        "layout": "row-spread",
+        "className": "",
+        "style": true,
+        "font": "",
+        "fontSize": 16,
+        "color": "#43f46f",
+        "x": 1050,
+        "y": 2780,
+        "wires": []
+    },
+    {
+        "id": "216c8e410eedeba8",
+        "type": "ui_chart",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "group": "6107215441735882",
+        "order": 14,
+        "width": 15,
+        "height": 8,
+        "label": "Nível (em Litros)",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "auto",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": true,
+        "colors": [
+            "#1f77b4",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1040,
+        "y": 2740,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2bdbc87ff38b2687",
+        "type": "ui_text",
+        "z": "d46d7f72c7f2dd27",
+        "group": "6107215441735882",
+        "order": 8,
+        "width": 5,
+        "height": 1,
+        "name": "",
+        "label": "Nível SetPoint",
+        "format": "{{msg.payload}} L",
+        "layout": "row-spread",
+        "className": "",
+        "style": true,
+        "font": "",
+        "fontSize": 16,
+        "color": "#ee8c2f",
+        "x": 1040,
+        "y": 2820,
+        "wires": []
+    },
+    {
+        "id": "fb4cce6517ab123b",
+        "type": "ui_text",
+        "z": "d46d7f72c7f2dd27",
+        "group": "6107215441735882",
+        "order": 10,
+        "width": 5,
+        "height": 1,
+        "name": "",
+        "label": "Vazão Inst.",
+        "format": "{{msg.payload}} ml/s",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1030,
+        "y": 2860,
+        "wires": []
+    },
+    {
+        "id": "7385edcee3cdd7d9",
+        "type": "ui_text",
+        "z": "d46d7f72c7f2dd27",
+        "group": "6107215441735882",
+        "order": 11,
+        "width": 5,
+        "height": 1,
+        "name": "",
+        "label": "Vazão Inst.",
+        "format": "{{msg.payload}} L/s",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1030,
+        "y": 2900,
+        "wires": []
+    },
+    {
+        "id": "1c91d61a7dff78c8",
+        "type": "ui_text",
+        "z": "d46d7f72c7f2dd27",
+        "group": "6107215441735882",
+        "order": 12,
+        "width": 5,
+        "height": 1,
+        "name": "",
+        "label": "Vazão Inst.",
+        "format": "{{msg.payload}} L/h",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1030,
+        "y": 2940,
+        "wires": []
+    },
+    {
+        "id": "d38f41da0bd59d99",
+        "type": "ui_text",
+        "z": "d46d7f72c7f2dd27",
+        "group": "6107215441735882",
+        "order": 13,
+        "width": 5,
+        "height": 1,
+        "name": "",
+        "label": "YF-S201",
+        "format": "{{msg.payload}} Hz",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1020,
+        "y": 2980,
+        "wires": []
+    },
+    {
+        "id": "880f259fe2f786e5",
+        "type": "ui_text",
+        "z": "d46d7f72c7f2dd27",
+        "group": "6107215441735882",
+        "order": 4,
+        "width": 5,
+        "height": 1,
+        "name": "",
+        "label": "Status Abastecimento",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1560,
+        "y": 3200,
+        "wires": []
+    },
+    {
+        "id": "fab476dcc8afaaa2",
+        "type": "mqtt in",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/iniciarProcesso",
+        "topic": "iniciarProcesso",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "453ffcdce8172332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 1320,
+        "y": 3160,
+        "wires": [
+            [
+                "6a81477bedc2eb87",
+                "3b5ae14097c61daa",
+                "880f259fe2f786e5"
+            ]
+        ]
+    },
+    {
+        "id": "3b5ae14097c61daa",
+        "type": "ui_led",
+        "z": "d46d7f72c7f2dd27",
+        "order": 7,
+        "group": "6107215441735882",
+        "width": 1,
+        "height": 1,
+        "label": "",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "0",
+                "valueType": "num"
+            },
+            {
+                "color": "#008000",
+                "value": "1",
+                "valueType": "num"
+            },
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "",
+        "x": 1510,
+        "y": 3160,
+        "wires": []
+    },
+    {
+        "id": "375e9fcb1533f3c5",
+        "type": "ui_switch",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "label": "Motor (Bomba)",
+        "tooltip": "",
+        "group": "6107215441735882",
+        "order": 6,
+        "width": 4,
+        "height": 1,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "",
+        "x": 1540,
+        "y": 3120,
+        "wires": [
+            [
+                "63490b818bcd6c8e"
+            ]
+        ]
+    },
+    {
+        "id": "08fc76686d3d6b5c",
+        "type": "ui_gauge",
+        "z": "d46d7f72c7f2dd27",
+        "name": "",
+        "group": "6107215441735882",
+        "order": 5,
+        "width": 10,
+        "height": 8,
+        "gtype": "wave",
+        "title": "Nível Acumulado",
+        "label": "L",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "50",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 1290,
+        "y": 2780,
+        "wires": []
+    },
+    {
+        "id": "6a81477bedc2eb87",
+        "type": "debug",
+        "z": "d46d7f72c7f2dd27",
+        "name": "debug 19",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1520,
+        "y": 3260,
+        "wires": []
+    },
+    {
+        "id": "63490b818bcd6c8e",
+        "type": "mqtt out",
+        "z": "d46d7f72c7f2dd27",
+        "name": "/iniciarProcesso",
+        "topic": "iniciarProcesso",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "453ffcdce8172332",
+        "x": 1740,
+        "y": 3120,
+        "wires": []
+    },
+    {
+        "id": "00dd3624aa10570b",
+        "type": "comment",
+        "z": "d46d7f72c7f2dd27",
+        "name": "Ligar Motor Bomba",
+        "info": "",
+        "x": 1330,
+        "y": 3040,
+        "wires": []
+    },
+    {
+        "id": "32f0a88c6b0a3c73",
+        "type": "ui_text",
+        "z": "d46d7f72c7f2dd27",
+        "group": "6107215441735882",
+        "order": 1,
+        "width": 5,
+        "height": 1,
+        "name": "",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1010,
+        "y": 3020,
+        "wires": []
+    },
+    {
+        "id": "3cb869d2a1b28c0e",
+        "type": "ui_text",
+        "z": "d46d7f72c7f2dd27",
+        "group": "6107215441735882",
+        "order": 2,
+        "width": 5,
+        "height": 1,
+        "name": "",
+        "label": "IP:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1010,
+        "y": 3060,
+        "wires": []
+    },
+    {
+        "id": "057690c42033af7e",
+        "type": "ui_text",
+        "z": "d46d7f72c7f2dd27",
+        "group": "6107215441735882",
+        "order": 3,
+        "width": 5,
+        "height": 1,
+        "name": "",
+        "label": "RSSI:",
+        "format": "{{msg.payload}} dBm",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1010,
+        "y": 3140,
+        "wires": []
+    },
+    {
+        "id": "9feef461a32d9780",
+        "type": "telegram bot",
+        "botname": "FigFelipe_bot",
+        "usernames": "",
+        "chatids": "6573584621",
+        "baseapiurl": "",
+        "testenvironment": false,
+        "updatemode": "polling",
+        "addressfamily": "",
+        "pollinterval": "300",
+        "usesocks": false,
+        "sockshost": "",
+        "socksprotocol": "socks5",
+        "socksport": "6667",
+        "socksusername": "anonymous",
+        "sockspassword": "",
+        "bothost": "",
+        "botpath": "",
+        "localbotport": "8443",
+        "publicbotport": "8443",
+        "privatekey": "",
+        "certificate": "",
+        "useselfsignedcertificate": false,
+        "sslterminated": false,
+        "verboselogging": false
+    },
+    {
+        "id": "453ffcdce8172332",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "test.mosquitto.org",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "6107215441735882",
+        "type": "ui_group",
+        "name": "Controle de Nível",
+        "tab": "2b4e85d55d0ffb06",
+        "order": 2,
+        "disp": true,
+        "width": "15",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "2b4e85d55d0ffb06",
+        "type": "ui_tab",
+        "name": "Tela de Monitoramento",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
