@@ -92,6 +92,8 @@ unsigned long lastMsg = 0;                      // Utilizado pelo Millis para ar
 char msg[MSG_BUFFER_SIZE];
 int value = 0;
 
+String mensagemDebug;                           // Mensagem de debug para o envio (publish) via MQTT
+
 String joystickBotaoPressionado;                // Nome do botão pressionado (Up, Down, Left, Right, Set e Reset)
 volatile bool exibirBotaoPressionado = false;   // Flag de evento, para somente quando algum botao do Joystick for acionado
 volatile int eventosInterrupcao = 0;            // Variável que realiza o debounce do INT do PCF8574
@@ -382,7 +384,7 @@ void ExibirVazaoInstantanea()
   oled.println(F("Vazao Inst:"));
 
   // Nível Setpoint
-  oled.setCursor(90, 37);
+  oled.setCursor(80, 37);
   oled.setTextSize(1);             
   oled.setTextColor(SSD1306_WHITE);
   oled.print(nivelSP);
@@ -489,7 +491,7 @@ void ExibirNivelAcumulado()
   oled.drawRect(2, 16, 124, 18, SSD1306_WHITE);
 
   // Nível Setpoint
-  oled.setCursor(90, 37);
+  oled.setCursor(80, 37); // 90, 37
   oled.setTextSize(1);             
   oled.setTextColor(SSD1306_WHITE);
   oled.print(nivelSP);
@@ -780,6 +782,10 @@ void ReadPcf8574Inputs()
         else if(menuPagina == 10) // Se estiver na pagina que define o SetPoint
         {
           menuPagina = 0; // Entao retorna a pagina anterior
+
+          // Publica a informação da variável 'nivelSP' via MQTT
+          client.publish("setpointNivel", String(nivelSP).c_str());
+
         }
       }
       else if(joystickBotaoPressionado == "Set")
@@ -795,6 +801,11 @@ void ReadPcf8574Inputs()
         }
         else
         {
+          mensagemDebug = "Não foi possível iniciar o processo pois PV = SP";
+
+          // Publica a mensagem de debug via MQTT, topico 'debugInfo'
+          client.publish("debugInfo", String(mensagemDebug).c_str());
+
           Serial.println("\n[INFO] Não foi possível iniciar o processo pois PV = SP");
         }
         
@@ -835,12 +846,28 @@ void callback(char* topic, byte* payload, unsigned int length)
   Serial.print(topic);
   Serial.print("] ");
   
+  String value;
+
   for (int i = 0; i < length; i++)
   {
+    // 1. Converte o byte payload para char
     Serial.print((char)payload[i]);
+
+    // 2. Converte o char array para o tipo String
+    value += (char)payload[i];
   }
   
   Serial.println();
+  
+  // Se receber conteúdo do tópico 'setpointNivel'
+  if(strcmp(topic, "setpointNivel") == 0)
+  {
+    // Converte o String para o tipo float
+    nivelSP = value.toFloat();
+
+    //Serial.println("Nivel convertido");
+    //Serial.println(nivelSP);
+  }
 
   // Se receber conteúdo do tópico 'localizarESP'
   if(strcmp(topic, "localizarESP") == 0)
@@ -1066,7 +1093,8 @@ void loop() {
     snprintf (msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
     //Serial.print("Publish message: ");
     //Serial.println(msg);
-    client.publish("nomeESP", String(clientId).c_str());
+
+    client.publish("nomeESP", String(clientId).c_str());    // Publica o 'clientId' no topico 'nomeESP'
 
   }
 
