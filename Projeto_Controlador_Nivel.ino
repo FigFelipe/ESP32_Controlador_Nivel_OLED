@@ -306,6 +306,9 @@ void ControleAutomacao()
     flagNivelSP = true;
 
     digitalWrite(comandoStartStop, LOW);  // Coloca o oscilador externo em stop
+
+    // Publica a mensagem de 'statusProcesso' via MQTT, topico 'iniciarProcesso'
+    client.publish("iniciarProcesso", String(statusProcesso).c_str());
   }
   
   if(statusProcesso)
@@ -326,6 +329,8 @@ void ControleAutomacao()
 
     alreadyDraw = false;
   }
+
+  
   
 }
 
@@ -814,6 +819,10 @@ void ReadPcf8574Inputs()
           flagIgnorarPulsos = false;
 
           digitalWrite(comandoStartStop, HIGH); // Coloca o oscilador externo em modo start
+
+          // Publica a mensagem de 'statusProcesso' via MQTT, topico 'iniciarProcesso'
+          client.publish("iniciarProcesso", String(statusProcesso).c_str());
+          
         }
         else
         {
@@ -833,6 +842,10 @@ void ReadPcf8574Inputs()
         flagIgnorarPulsos = true;
 
         digitalWrite(comandoStartStop, LOW);  // Coloca o oscilador externo em modo stop
+
+        // Publica a mensagem de 'statusProcesso' via MQTT, topico 'iniciarProcesso'
+        client.publish("iniciarProcesso", String(statusProcesso).c_str());
+        
       }
 
       // Debug para acompanhamento
@@ -1006,7 +1019,7 @@ void reconnect()
 
       client.publish("nivelAcumulado", String(vazaoAcumuladaLitro).c_str());                   // Publica o 'vazaoAcumuladaLitro' no topico 'nivelAcumulado'
 
-      //client.publish("setpointNivel", String(nivelSP).c_str());                                // Publica o 'nivelSP' no topico 'setpointNivel'
+      client.publish("setpointNivel", String(nivelSP).c_str());                                // Publica o 'nivelSP' no topico 'setpointNivel'
 
       client.publish("vazaoInstMililitroSegundo", String(vazaoInstMililitroSegundo).c_str());  // Publica o 'vazaoInstMililitroSegundo' no topico 'vazaoInstMililitroSegundo'
       client.publish("vazaoInstLitroSegundo", String(vazaoInstLitroSegundo).c_str());          // Publica o 'vazaoInstLitroSegundo' no topico 'vazaoInstLitroSegundo'
@@ -1200,7 +1213,7 @@ void loop() {
     
     client.publish("nivelAcumulado", String(vazaoAcumuladaLitro).c_str());                   // Publica o 'vazaoAcumuladaLitro' no topico 'nivelAcumulado'
 
-    //client.publish("setpointNivel", String(nivelSP).c_str());                                // Publica o 'nivelSP' no topico 'setpointNivel'
+    client.publish("setpointNivel", String(nivelSP).c_str());                                // Publica o 'nivelSP' no topico 'setpointNivel'
     
     client.publish("vazaoInstMililitroSegundo", String(vazaoInstMililitroSegundo).c_str());  // Publica o 'vazaoInstMililitroSegundo' no topico 'vazaoInstMililitroSegundo'
     client.publish("vazaoInstLitroSegundo", String(vazaoInstLitroSegundo).c_str());          // Publica o 'vazaoInstLitroSegundo' no topico 'vazaoInstLitroSegundo'
