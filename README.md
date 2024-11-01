@@ -13,7 +13,7 @@ Realizar, de modo didático, o controle de nível com o ESP32 integrando os peri
  - **MCU:** Espressif ESP32-Wroom Dev Module
 
 ## Arquitetura de Integração da Automação
-![Arquitetura da Automacao]([https://github.com/](https://github.com/FigFelipe/ESP32_Controlador_Nivel_OLED/blob/main/Arquitetura_automacao.JPG))
+![Arquitetura da Automacao](Arquitetura_automacao.JPG)
 
 ## Dispositivos
 
